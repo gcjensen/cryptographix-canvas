@@ -1,0 +1,81 @@
+body {
+  margin: 0;
+  background-color: #424747;
+}
+
+.splash {
+  text-align: center;
+  margin: 10% 0 0 0;
+  box-sizing: border-box;
+}
+
+.splash .message {
+  color: white;
+  font-size: 72px;
+  line-height: 72px;
+  text-shadow: rgba(0, 0, 0, 0.5) 0 0 15px;
+  font-family: Oswald;
+}
+
+.splash .fa-spinner {
+  color: white;
+  text-align: center;
+  display: inline-block;
+  font-size: 72px;
+  margin-top: 50px;
+}
+
+.page-host {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50px;
+  bottom: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: #424747;
+}
+
+.navbar-brand {
+  float: none;
+}
+
+.navbar-center {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 0;
+  text-align: center;
+  margin: auto;
+  height:100%;
+}
+
+.page-title {
+  font-family: Oswald;
+  color: #525858;
+  font-size: 100px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  line-height: 10px;
+  text-align: center; 
+  margin-top: 260px;
+  text-transform: uppercase;
+}
+
+.node {
+    position: absolute;
+    height: 100px; width: 100px;
+    background-color: white;
+    border: 3px solid #77aca7;
+    border-radius: 20px;
+}
+
+section {
+  margin: 0 20px;
+}
+
+.navbar-nav li.loader {
+  margin: 12px 24px 0 6px;
+}
+
