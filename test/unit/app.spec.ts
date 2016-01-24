@@ -26,7 +26,7 @@ describe('the App module', () => {
   });
 
   it('configures the router title', () => {
-    expect(sut.router.title).toEqual('Build Secure');
+    expect(sut.router.title).toEqual('comp3200);
   });
 
   it('should have a home route', () => {

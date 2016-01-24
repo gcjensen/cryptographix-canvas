@@ -1,29 +1,38 @@
 import {autoinject} from 'aurelia-framework';
 import {Config} from 'config';
+import {Graph, Direction} from '../libs/sim-core-master/dist/cryptographix-sim-core';
 
 @autoinject
 export class Builder {
 
 	heading = 'Builder';
-	graph: any;
+	graph: Graph;
+	views: {};
 
-    constructor(private config: Config) {
-		this.graph = config.getJSON();
-  	}
+    constructor(private config: Config, graph: Graph) {
+		this.graph = new Graph(null, config.getJSON());
+		this.views = {
+			"node1": { x: "100px", y: "200px", width: "100px", height: "100px" },
+			"node2": { x: "450px", y: "400px", width: "100px", height: "100px" },
+			"node3": { x: "820px", y: "150px", width: "100px", height: "100px" },
+			"node4": { x: "1100px", y: "300px", width: "100px", height: "100px" }
+		}
+	}
 
-  	attached() {
+	attached() {
 		this.configureGraph(this.graph);
-  	}  
+	}  
 
 	detached() {
 		this.removeGraph(this.graph);
 	}
 
     configureGraph(graph: any) {
-		for (let node of this.graph.nodes) {
+
+    	graph.nodes.forEach(function(node) {
 			this.addNodeToDom(node);
-			this.addPortsToNode(node);		
-		}
+			this.addPortsToNode(node);
+    	}.bind(this));
 		this.connectNodes(graph.links);
 	}
 
@@ -33,31 +42,36 @@ export class Builder {
 		nodeInDOM.className = "node";
 		document.body.appendChild(nodeInDOM);
 		nodeInDOM.style.position = "absolute";
-		nodeInDOM.style.left = node.view.x;
-		nodeInDOM.style.top = node.view.y;
-		nodeInDOM.style.width = node.view.width;
-		nodeInDOM.style.height = node.view.height;
+		nodeInDOM.style.left = this.views[node.id].x;
+		nodeInDOM.style.top = this.views[node.id].y;
+		nodeInDOM.style.width = this.views[node.id].width;
+		nodeInDOM.style.height = this.views[node.id].height;
 
 		jsPlumb.draggable(node.id);
 	}
 
 	addPortsToNode(node: any) {
-	
 		var portsArray = this.sortPorts(node.ports);
 	
-		// do everything for the out ports, then for the in ports
-		for (let portArray of [portsArray[0], portsArray[1]]) {
+		// do everything for the inout, in and out ports respectively
+		for (let portArray of [portsArray[0], portsArray[1], portsArray[2]]) {
 			if (portArray.length > 0) {
-				var isOut = portArray[0].direction === 'out';
+				
 				for (var j = 0; j < portArray.length; j++) {
-					var y = (1 / (portArray.length + 1)) + ((1 / (portArray.length + 1)) * j);
+					if (portArray[0].direction === Direction.INOUT) 	{
+						var x = (1 / (portArray.length + 1)) + ((1 / (portArray.length + 1)) * j);						
+						var y = 0;
+					} else {
+						var x = portArray[0].direction - 1;
+						var y = (1 / (portArray.length + 1)) + ((1 / (portArray.length + 1)) * j);
+					}
 
 					jsPlumb.addEndpoint(node.id, 
 					{
 						uuid: node.id + portArray[j].id,
-						anchors: [[isOut ? 1 : 0, y]],
-						isSource: isOut,
-						isTarget: !isOut,
+						anchors: [[x, y]],
+						isSource: portArray[0].direction === Direction.OUT,
+						isTarget:portArray[0].direction === Direction.IN,
 						maxConnections: -1,
 						paintStyle: { fillStyle: "#77aca7 ", radius: 3 },
 						hoverPaintStyle: { fillStyle: "#77aca7", radius: 6 },
@@ -70,33 +84,36 @@ export class Builder {
 	}
 
 	connectNodes(links: any) {
-   		// loop through the links in the config file connecting the appropriate nodes
-   		for (let link of links) {
-	    //for (var i = 0; i < this.graph.links.length; i++) {    
+		links.forEach(function(link) {
 			jsPlumb.connect({
-				uuids: [link.from.nodeID + link.from.portID, link.to.nodeID + link.to.portID],
+				uuids: [link.fromNode.id + link.fromPort.id, link.toNode.id + link.toPort.id],
 				endpointStyle: { fillStyle: "#77aca7", radius: 3 },
 				hoverPaintStyle: { radius: 6 },
 				paintStyle: { strokeStyle: "#77aca7", lineWidth: 2 },
 			});
-		}
+		});
 	}
 
 	sortPorts(ports: any) {
-		var outPorts = [];
+		var inOutPorts = [];
 		var inPorts = [];
-		for (let port of ports) {
-			if (port.direction === 'out') {
-				outPorts.push(port);
-			} else {
+		var outPorts = [];
+
+		ports.forEach(function(port) {
+			if (port.direction === Direction.INOUT) {
+				inOutPorts.push(port);
+			} else if (port.direction === Direction.IN) {
 				inPorts.push(port);
+			} else {
+				outPorts.push(port);
 			}
-		}
-		return [outPorts, inPorts];
+		});
+		return [inOutPorts, inPorts, outPorts];
 	}
 
 	removeGraph(graph: any) {
-		for (let node of graph.nodes) 
-	    	jsPlumb.remove(node.id);
+		graph.nodes.forEach(function(node) {
+			jsPlumb.remove(node.id);
+		});
 	}
 }	
