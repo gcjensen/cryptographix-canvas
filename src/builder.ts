@@ -20,23 +20,23 @@ export class Builder {
   }
 
   attached() {
-	this.configureGraph(this.graph);
+  	this.configureGraph(this.graph);
   }  
 
   detached() {
-	this.removeGraph(this.graph);
+  	this.removeGraph(this.graph);
   }
 
   configureGraph(graph: any) {
-	graph.nodes.forEach(function(node) {
-		this.addNodeToDom(node);
-		this.addPortsToNode(node);
+  	graph.nodes.forEach(function(node) {
+	  this.addNodeToDom(node);
+	  this.addPortsToNode(node);
 	}.bind(this));
 	this.connectNodes(graph.links);
   }
 
   addNodeToDom(node: any) {
-	var nodeInDOM = document.createElement("div");
+  	var nodeInDOM = document.createElement("div");
 	nodeInDOM.setAttribute("id", node.id);
 	nodeInDOM.className = "node";
 	document.body.appendChild(nodeInDOM);
