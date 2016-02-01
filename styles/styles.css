@@ -63,12 +63,43 @@ body {
   text-transform: uppercase;
 }
 
+.btn-circle.btn-lg {
+  width: 50px;
+  height: 50px;
+  padding: 10px 16px;
+  font-size: 18px;
+  line-height: 1.33;
+  border-radius: 25px;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-color: #77aca7;
+  color: white;
+}
+
+.btn-circle.btn-lg:hover {
+  background-color: white;
+  color: #77aca7;
+}
+
+.btn-circle.btn-lg:focus {
+  outline: 0 !important;
+}
+
 .node {
-    position: absolute;
-    height: 100px; width: 100px;
-    background-color: white;
-    border: 3px solid #77aca7;
-    border-radius: 20px;
+  position: absolute;
+  height: 100px; width: 100px;
+  background-color: white;
+  border: 3px solid #77aca7;
+  border-radius: 20px;
+}
+
+.nodeID {
+  font-family: Oswald;
+  color: #77aca7;
+  font-size: 25px;
+  text-align: center; 
+  margin-top: 25px;
 }
 
 section {
@@ -77,5 +108,31 @@ section {
 
 .navbar-nav li.loader {
   margin: 12px 24px 0 6px;
+}
+
+
+/* css for page transition animations */
+
+section.au-enter-active {
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+}
+
+@-webkit-keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
