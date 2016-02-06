@@ -1,4 +1,6 @@
 import {autoinject, customElement, bindable, containerless, TaskQueue} from 'aurelia-framework';
+import {DialogService} from 'aurelia-dialog';
+import {LinkConfigDialog} from './link-config-dialog';
 import {Network, Node, Link, Direction} from '../libs/sim-core-master/dist/cryptographix-sim-core';
 import {NodeElement} from 'node-element';
 
@@ -11,9 +13,11 @@ export class Canvas {
   private network: Network;
   private nodes = [];
   private taskQueue: TaskQueue;
+  private dialogService: DialogService;
 
-  constructor(taskQueue: TaskQueue) {
+  constructor(taskQueue: TaskQueue, dialogService: DialogService) {
     this.taskQueue = taskQueue;
+    this.dialogService = dialogService;
   }
 
   attached() {
@@ -119,7 +123,7 @@ export class Canvas {
     var self = this;
     
     jsPlumb.bind("connection", function(data) {
-        // check to deal with an idiosyncrasy of jsPlumb where 'connection' gets fired as well as 'connectionMoved'
+      // check to deal with an idiosyncrasy of jsPlumb where 'connection' gets fired as well as 'connectionMoved'
       if (self.isNewConnection(data.connection.id))
         self.createLink(data.connection.endpoints[0].getUuid(), data.connection.endpoints[1].getUuid(), undefined);
     });
@@ -164,20 +168,37 @@ export class Canvas {
 
   createLink(sourceEndPointID: any, targetEndPointID: any, linkID: string) {
     
-    if (!linkID) {
-      // pop up modal to allow user to specify link name and protocol etc.
-      linkID = "link4";
+    if (!linkID) {     
+      this.dialogService.open({ viewModel: LinkConfigDialog }).then(response => {
+        if (!response.wasCancelled) {
+          // rename the jsPlumb connection instance to the user chosen name
+          jsPlumb.getConnections()[jsPlumb.getConnections().length - 1].id = response.output;
+         
+          // endpoint UUIDs contain information about the node they're on, so we must split this out  
+          this.network.graph.addLink(response.output, {
+            from: { nodeID: sourceEndPointID.split("-")[0], portID: sourceEndPointID.split("-")[1] },
+            to: { nodeID: targetEndPointID.split("-")[0], portID: targetEndPointID.split("-")[1] }
+          });
+        } else {
+          // if no ID is provided, remove the connection
+          var connections = jsPlumb.getConnections()
+          jsPlumb.detach(connections[connections.length - 1])
+        }
+      });
+    } else {
+      // endpoint UUIDs contain information about the node they're on, so we must split this out  
+      this.network.graph.addLink(linkID, {
+        from: { nodeID: sourceEndPointID.split("-")[0], portID: sourceEndPointID.split("-")[1] },
+        to: { nodeID: targetEndPointID.split("-")[0], portID: targetEndPointID.split("-")[1] }
+      });
     }
 
-    // endpoint UUIDs contain information about the node they're on, so we must split this out  
-    this.network.graph.addLink(linkID, {
-      from: { nodeID: sourceEndPointID.split("-")[0], portID: sourceEndPointID.split("-")[1] },
-      to: { nodeID: targetEndPointID.split("-")[0], portID: targetEndPointID.split("-")[1] }
-    });
+    // improve the above to remove large amount of repeated code
   }
 
   removeLink(linkID: string) {  
     this.network.graph.removeLink(linkID);
+    console.log("removed " + linkID);
   }
 
   changeLink(data: any) { 

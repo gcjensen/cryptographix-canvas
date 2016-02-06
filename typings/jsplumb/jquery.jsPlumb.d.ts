@@ -19,14 +19,15 @@ interface jsPlumbInstance {
 	addEndpoint(ep: string, options: any): any;
 	removeClass(el: any, clazz: string): void;
 	hasClass(el: any, clazz: string): void;
-    draggable(el: string, options?: DragOptions): jsPlumbInstance;
-   	draggable(ids: string[], options?: DragOptions): jsPlumbInstance;
-   	connect(connection: ConnectParams, referenceParams?: ConnectParams): Connection;
+  draggable(el: string, options?: DragOptions): jsPlumbInstance;
+ 	draggable(ids: string[], options?: DragOptions): jsPlumbInstance;
+	connect(connection: ConnectParams, referenceParams?: ConnectParams): Connection;
 	makeSource(el: string, options: SourceOptions): void;
 	makeTarget(el: string, options: TargetOptions): void;
 	repaintEverything(): void;
 	detachEveryConnection(): void;
 	detachAllConnections(el: string): void;
+  detach(el: string): void;
 	remove(el: string): void;
 	removeAllEndpoints(el: string, recurse?: boolean): jsPlumbInstance;
 	removeAllEndpoints(el: Element, recurse?: boolean): jsPlumbInstance;
