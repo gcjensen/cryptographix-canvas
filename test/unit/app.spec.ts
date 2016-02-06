@@ -26,14 +26,14 @@ describe('the App module', () => {
   });
 
   it('configures the router title', () => {
-    expect(sut.router.title).toEqual('comp3200);
+    expect(sut.router.title).toEqual('comp3200');
   });
 
   it('should have a home route', () => {
-    expect(sut.router.routes).toContain({ route: ['', 'home'], name: 'home', moduleId: 'home', nav: true, title: 'Home', settings: 'home' });
+    expect(sut.router.routes).toContain({ route: ['','home'], name: 'home',  moduleId: 'home', nav: true, title:'Home', settings:'home' });
   });
 
-  it('should have a users route', () => {
-    expect(sut.router.routes).toContain({ route: 'builder', name: 'builder', moduleId: 'builder', nav: true, title: 'Builder', ettings: 'wrench' });
+  it('should have a builder route', () => {
+     expect(sut.router.routes).toContain({ route: 'builder', name: 'builder', moduleId: 'builder', nav: true, title:'Builder', settings:'wrench' });
   });
 });

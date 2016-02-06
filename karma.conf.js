@@ -6,6 +6,7 @@ module.exports = function(config) {
       configFile: 'config.js',
       config: {
         paths: {
+          "test/unit/*": "test/unit/*",
           "*": null,
           "src/*": "src/*",
           "typescript": "node_modules/typescript/lib/typescript.js",

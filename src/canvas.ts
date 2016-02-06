@@ -1,6 +1,5 @@
 import {autoinject, customElement, bindable, containerless, TaskQueue} from 'aurelia-framework';
 import {Network, Node, Link, Direction} from '../libs/sim-core-master/dist/cryptographix-sim-core';
-import {Config} from 'config';
 import {NodeElement} from 'node-element';
 
 @autoinject
@@ -11,7 +10,6 @@ export class Canvas {
 
   private network: Network;
   private nodes = [];
-  private json: {};
   private taskQueue: TaskQueue;
 
   constructor(taskQueue: TaskQueue) {
@@ -23,9 +21,7 @@ export class Canvas {
     this.network.loadComponents().then(()=> {
       this.network.initialize();  
 
-      // network object is now ready, so view can be rendered
       this.network.graph.nodes.forEach(node => {
-        this.addViewDataToNode(node);
         this.nodes.push(node);
       });
 
@@ -38,15 +34,18 @@ export class Canvas {
 
   // jsPlumb stuff is removed before changing views
   detached() {
+    this.unregisterEvents();
+    jsPlumb.detachEveryConnection();
     this.removeGraph(this.network.graph);
   }
 
   setUpGraphUI() {
     for (let node of this.nodes) {
-        this.configureDomElement(node);
-        this.addPortsToNode(node);
+      this.configureDomElement(node);
+      this.addPortsToNode(node);
     }
     this.connectNodes(this.network.graph.links); 
+    this.registerEvents();
   }
 
   configureDomElement(node: Node) {
@@ -55,9 +54,15 @@ export class Canvas {
     nodeElement.style.top = node.metadata.view.y;
     nodeElement.style.width = node.metadata.view.width;
     nodeElement.style.height = node.metadata.view.height;    
-    jsPlumb.draggable(node.id);
+
+    jsPlumb.draggable(node.id, {
+      stop: function(e) {
+        node.metadata.view.x = e.pos[0];    
+        node.metadata.view.y = e.pos[1];
+      }
+    });
   }
-      
+
 
   addPortsToNode(node: Node) {
     var portsArray = this.sortPorts(node.ports);
@@ -66,7 +71,8 @@ export class Canvas {
     for (let portArray of [portsArray[0], portsArray[1], portsArray[2]]) {
       if (portArray.length > 0) {
       
-        /* ports are spaced out evenly on the node, depending on the number of them
+        /* 
+         * ports are spaced out evenly on the node, depending on the number of them
          * INOUT - top of node
          * IN - left of node
          * OUT - right of node
@@ -82,7 +88,7 @@ export class Canvas {
 
           jsPlumb.addEndpoint(node.id, {
             // id's are combined so connections can be drawn from specific ports on specific nodes
-            uuid: node.id + portArray[j].id,
+            uuid: node.id + "-" + portArray[j].id,
             anchors: [[x, y]],
             isSource: portArray[0].direction === Direction.OUT,
             isTarget:portArray[0].direction === Direction.IN,           
@@ -99,22 +105,38 @@ export class Canvas {
 
   connectNodes(links: Link[]) {
     links.forEach(function(link) {
-      jsPlumb.connect({
-          uuids: [link.fromNode.id + link.fromPort.id, link.toNode.id + link.toPort.id],
-          endpointStyle: { fillStyle: "#77aca7", radius: 3 },
-          hoverPaintStyle: { radius: 6 },
-          paintStyle: { strokeStyle: "#77aca7", lineWidth: 2 },
-        });
-      });
+      (jsPlumb.connect({
+        uuids: [link.fromNode.id + "-" + link.fromPort.id, link.toNode.id + "-" + link.toPort.id],
+        endpointStyle: { fillStyle: "#77aca7", radius: 3 },
+        hoverPaintStyle: { radius: 6 },
+        paintStyle: { strokeStyle: "#77aca7", lineWidth: 2 },
+      }) as any).id = link._id; 
+      // connection is cast to any, because jsPlumb typescript definitions don't include .id for some reason     
+    });
   }
 
-  addViewDataToNode(node: Node) {
-    node.metadata["view"] = {
-      x: Config.json().nodes[node.id].view.x,
-      y: Config.json().nodes[node.id].view.y,
-      width: Config.json().nodes[node.id].view.width,
-      height: Config.json().nodes[node.id].view.height
-    }
+  registerEvents() {
+    var self = this;
+    
+    jsPlumb.bind("connection", function(data) {
+        // check to deal with an idiosyncrasy of jsPlumb where 'connection' gets fired as well as 'connectionMoved'
+      if (self.isNewConnection(data.connection.id))
+        self.createLink(data.connection.endpoints[0].getUuid(), data.connection.endpoints[1].getUuid(), undefined);
+    });
+
+    jsPlumb.bind("connectionDetached", function(data) { 
+      self.removeLink(data.connection.id);
+    });
+
+    jsPlumb.bind("connectionMoved", function(data) {
+      self.changeLink(data);
+    });
+  }
+
+  unregisterEvents() {
+    jsPlumb.unbind("connection");
+    jsPlumb.unbind("connectionDetached");
+    jsPlumb.unbind("connectionMoved");
   }
 
   sortPorts(ports: any) {
@@ -138,6 +160,37 @@ export class Canvas {
     graph.nodes.forEach(function(node) {
       jsPlumb.remove(node.id);
     });
+  }
+
+  createLink(sourceEndPointID: any, targetEndPointID: any, linkID: string) {
+    
+    if (!linkID) {
+      // pop up modal to allow user to specify link name and protocol etc.
+      linkID = "link4";
+    }
+
+    // endpoint UUIDs contain information about the node they're on, so we must split this out  
+    this.network.graph.addLink(linkID, {
+      from: { nodeID: sourceEndPointID.split("-")[0], portID: sourceEndPointID.split("-")[1] },
+      to: { nodeID: targetEndPointID.split("-")[0], portID: targetEndPointID.split("-")[1] }
+    });
+  }
+
+  removeLink(linkID: string) {  
+    this.network.graph.removeLink(linkID);
+  }
+
+  changeLink(data: any) { 
+    this.removeLink(data.connection.id);
+    this.createLink(data.originalSourceEndpoint.getUuid(), data.newTargetEndpoint.getUuid(), data.connection.id);
+  }
+
+  isNewConnection(linkID: any) {
+    var isNew: Boolean;
+    this.network.graph.links.forEach(link => {  
+      isNew = link._id !== linkID; 
+    });
+    return isNew;
   }
 
 }

@@ -4,4 +4,4 @@
 /// <reference path="angular-protractor/angular-protractor.d.ts" />
 /// <reference path="selenium-webdriver/selenium-webdriver.d.ts" />
 /// <reference path="jsplumb/jquery.jsPlumb.d.ts" />
-/// <reference path="../libs/sim-core-master/dist/cryptographix-sim-core.d.ts" />
+/// <reference path="sim-core/cryptographix-sim-core.d.ts" />

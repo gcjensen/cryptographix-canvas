@@ -95,7 +95,8 @@ interface ConnectParams {
 }
 
 interface DragOptions {
-	containment?: string;
+  containment?: string;
+  stop?: {};
 }
 
 interface SourceOptions {
