@@ -21,6 +21,7 @@ interface jsPlumbInstance {
 	hasClass(el: any, clazz: string): void;
   draggable(el: string, options?: DragOptions): jsPlumbInstance;
  	draggable(ids: string[], options?: DragOptions): jsPlumbInstance;
+  setDraggable(el: string, isDraggable: Boolean): void;
 	connect(connection: ConnectParams, referenceParams?: ConnectParams): Connection;
 	makeSource(el: string, options: SourceOptions): void;
 	makeTarget(el: string, options: TargetOptions): void;
@@ -40,6 +41,7 @@ interface jsPlumbInstance {
 	getInstance(): jsPlumbInstance;
 	getInstance(defaults: Defaults): jsPlumbInstance;
 	getInstanceIndex(): number;
+  animate(el: string, options1: {}, options2: {}, options3: {}): void;
 	
     SVG: string;
     CANVAS: string;

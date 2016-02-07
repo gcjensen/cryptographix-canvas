@@ -23,6 +23,10 @@ export class Builder {
     // the created network object is then bound to the canvas custom element in the view
   }
 
+  attached() {
+    document.getElementById('page-title').style.marginTop = ((screen.height / 2) - 100) + "px";
+  }
+
   addViewDataToNode(node: Node) {
     node.metadata["view"] = {
       x: exampleGraph.nodes[node.id].view.x,

@@ -1,7 +1,7 @@
 System.register(['aurelia-dependency-injection', 'aurelia-event-aggregator'], function (_export) {
     'use strict';
 
-    var Container, inject, EventAggregator, HexCodec, BASE64SPECIALS, Base64Codec, ByteArray, Enum, KindInfo, KindBuilder, Oranges, FruityKind, Message, KindMessage, window, TaskScheduler, Channel, Direction, EndPoint, ProtocolTypeBits, Protocol, ClientServerProtocol, APDU, APDUMessage, APDUProtocol, PortInfo, ComponentInfo, StoreInfo, ComponentBuilder, C, Key, PrivateKey, PublicKey, KeyPair, CryptographicService, EventHub, Port, PublicPort, Node, RunState, RuntimeContext, ModuleRegistryEntry, SystemModuleLoader, ComponentFactory, Link, Network, Graph, SimulationEngine;
+    var Container, inject, EventAggregator, HexCodec, BASE64SPECIALS, Base64Codec, ByteArray, Key, PrivateKey, PublicKey, KeyPair, CryptographicService, EventHub, Enum, KindInfo, KindBuilder, Oranges, FruityKind, Message, KindMessage, window, TaskScheduler, Channel, Direction, EndPoint, ProtocolTypeBits, Protocol, ClientServerProtocol, APDU, APDUMessage, APDUProtocol, PortInfo, StoreInfo, ComponentInfo, ComponentBuilder, C, Port, PublicPort, Node, RunState, RuntimeContext, ModuleRegistryEntry, SystemModuleLoader, ComponentFactory, Link, Network, Graph, SimulationEngine;
 
     var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
@@ -322,6 +322,216 @@ System.register(['aurelia-dependency-injection', 'aurelia-event-aggregator'], fu
             ByteArray.BASE64 = 2;
             ByteArray.UTF8 = 3;
 
+            Key = (function () {
+                function Key(id, key) {
+                    _classCallCheck(this, Key);
+
+                    this.id = id;
+                    if (key) this.cryptoKey = key;else {
+                        this.cryptoKey = {
+                            type: "",
+                            algorithm: "",
+                            extractable: true,
+                            usages: []
+                        };
+                    }
+                }
+
+                _createClass(Key, [{
+                    key: 'type',
+                    get: function get() {
+                        return this.cryptoKey.type;
+                    }
+                }, {
+                    key: 'algorithm',
+                    get: function get() {
+                        return this.cryptoKey.algorithm;
+                    }
+                }, {
+                    key: 'extractable',
+                    get: function get() {
+                        return this.cryptoKey.extractable;
+                    }
+                }, {
+                    key: 'usages',
+                    get: function get() {
+                        return this.cryptoKey.usages;
+                    }
+                }, {
+                    key: 'innerKey',
+                    get: function get() {
+                        return this.cryptoKey;
+                    }
+                }]);
+
+                return Key;
+            })();
+
+            _export('Key', Key);
+
+            PrivateKey = (function (_Key) {
+                _inherits(PrivateKey, _Key);
+
+                function PrivateKey() {
+                    _classCallCheck(this, PrivateKey);
+
+                    _Key.apply(this, arguments);
+                }
+
+                return PrivateKey;
+            })(Key);
+
+            _export('PrivateKey', PrivateKey);
+
+            PublicKey = (function (_Key2) {
+                _inherits(PublicKey, _Key2);
+
+                function PublicKey() {
+                    _classCallCheck(this, PublicKey);
+
+                    _Key2.apply(this, arguments);
+                }
+
+                return PublicKey;
+            })(Key);
+
+            _export('PublicKey', PublicKey);
+
+            KeyPair = function KeyPair() {
+                _classCallCheck(this, KeyPair);
+            };
+
+            _export('KeyPair', KeyPair);
+
+            CryptographicService = (function () {
+                function CryptographicService() {
+                    _classCallCheck(this, CryptographicService);
+
+                    this.crypto = window.crypto.subtle;
+                    if (!this.crypto && msrcrypto) this.crypto = msrcrypto;
+                }
+
+                CryptographicService.prototype.decrypt = function decrypt(algorithm, key, data) {
+                    var _this = this;
+
+                    return new Promise(function (resolve, reject) {
+                        _this.crypto.decrypt(algorithm, key.innerKey, data.backingArray).then(function (res) {
+                            resolve(new ByteArray(res));
+                        })['catch'](function (err) {
+                            reject(err);
+                        });
+                    });
+                };
+
+                CryptographicService.prototype.digest = function digest(algorithm, data) {
+                    var _this2 = this;
+
+                    return new Promise(function (resolve, reject) {
+                        _this2.crypto.digest(algorithm, data.backingArray).then(function (res) {
+                            resolve(new ByteArray(res));
+                        })['catch'](function (err) {
+                            reject(err);
+                        });
+                    });
+                };
+
+                CryptographicService.prototype.encrypt = function encrypt(algorithm, key, data) {
+                    var _this3 = this;
+
+                    return new Promise(function (resolve, reject) {
+                        _this3.crypto.encrypt(algorithm, key.innerKey, data.backingArray).then(function (res) {
+                            resolve(new ByteArray(res));
+                        })['catch'](function (err) {
+                            reject(err);
+                        });
+                    });
+                };
+
+                CryptographicService.prototype.exportKey = function exportKey(format, key) {
+                    var _this4 = this;
+
+                    return new Promise(function (resolve, reject) {
+                        _this4.crypto.exportKey(format, key.innerKey).then(function (res) {
+                            resolve(new ByteArray(res));
+                        })['catch'](function (err) {
+                            reject(err);
+                        });
+                    });
+                };
+
+                CryptographicService.prototype.generateKey = function generateKey(algorithm, extractable, keyUsages) {
+                    return new Promise(function (resolve, reject) {});
+                };
+
+                CryptographicService.prototype.importKey = function importKey(format, keyData, algorithm, extractable, keyUsages) {
+                    var _this5 = this;
+
+                    return new Promise(function (resolve, reject) {
+                        _this5.crypto.importKey(format, keyData.backingArray, algorithm, extractable, keyUsages).then(function (res) {
+                            resolve(res);
+                        })['catch'](function (err) {
+                            reject(err);
+                        });
+                    });
+                };
+
+                CryptographicService.prototype.sign = function sign(algorithm, key, data) {
+                    var _this6 = this;
+
+                    return new Promise(function (resolve, reject) {
+                        _this6.crypto.sign(algorithm, key.innerKey, data.backingArray).then(function (res) {
+                            resolve(new ByteArray(res));
+                        })['catch'](function (err) {
+                            reject(err);
+                        });
+                    });
+                };
+
+                CryptographicService.prototype.verify = function verify(algorithm, key, signature, data) {
+                    var _this7 = this;
+
+                    return new Promise(function (resolve, reject) {
+                        _this7.crypto.verify(algorithm, key.innerKey, signature.backingArray, data.backingArray).then(function (res) {
+                            resolve(new ByteArray(res));
+                        })['catch'](function (err) {
+                            reject(err);
+                        });
+                    });
+                };
+
+                return CryptographicService;
+            })();
+
+            _export('CryptographicService', CryptographicService);
+
+            _export('Container', Container);
+
+            _export('inject', inject);
+
+            EventHub = (function () {
+                function EventHub() {
+                    _classCallCheck(this, EventHub);
+
+                    this._eventAggregator = new EventAggregator();
+                }
+
+                EventHub.prototype.publish = function publish(event, data) {
+                    this._eventAggregator.publish(event, data);
+                };
+
+                EventHub.prototype.subscribe = function subscribe(event, handler) {
+                    return this._eventAggregator.subscribe(event, handler);
+                };
+
+                EventHub.prototype.subscribeOnce = function subscribeOnce(event, handler) {
+                    return this._eventAggregator.subscribeOnce(event, handler);
+                };
+
+                return EventHub;
+            })();
+
+            _export('EventHub', EventHub);
+
             Enum = function Enum() {
                 _classCallCheck(this, Enum);
             };
@@ -557,7 +767,7 @@ System.register(['aurelia-dependency-injection', 'aurelia-event-aggregator'], fu
                 };
 
                 Channel.prototype.sendMessage = function sendMessage(origin, message) {
-                    var _this = this;
+                    var _this8 = this;
 
                     var isResponse = message.header && message.header.isResponse;
                     if (!this._active) return;
@@ -565,8 +775,8 @@ System.register(['aurelia-dependency-injection', 'aurelia-event-aggregator'], fu
                     this._endPoints.forEach(function (endPoint) {
                         if (origin != endPoint) {
                             if (endPoint.direction != Direction.OUT || isResponse) {
-                                _this._taskScheduler.queueTask(function () {
-                                    endPoint.handleMessage(message, origin, _this);
+                                _this8._taskScheduler.queueTask(function () {
+                                    endPoint.handleMessage(message, origin, _this8);
                                 });
                             }
                         }
@@ -630,27 +840,27 @@ System.register(['aurelia-dependency-injection', 'aurelia-event-aggregator'], fu
                 };
 
                 EndPoint.prototype.detachAll = function detachAll() {
-                    var _this2 = this;
+                    var _this9 = this;
 
                     this._channels.forEach(function (channel) {
-                        channel.removeEndPoint(_this2);
+                        channel.removeEndPoint(_this9);
                     });
                     this._channels = [];
                 };
 
                 EndPoint.prototype.handleMessage = function handleMessage(message, fromEndPoint, fromChannel) {
-                    var _this3 = this;
+                    var _this10 = this;
 
                     this._messageListeners.forEach(function (messageListener) {
-                        messageListener(message, _this3, fromChannel);
+                        messageListener(message, _this10, fromChannel);
                     });
                 };
 
                 EndPoint.prototype.sendMessage = function sendMessage(message) {
-                    var _this4 = this;
+                    var _this11 = this;
 
                     this._channels.forEach(function (channel) {
-                        channel.sendMessage(_this4, message);
+                        channel.sendMessage(_this11, message);
                     });
                 };
 
@@ -751,6 +961,12 @@ System.register(['aurelia-dependency-injection', 'aurelia-event-aggregator'], fu
 
             _export('PortInfo', PortInfo);
 
+            StoreInfo = function StoreInfo() {
+                _classCallCheck(this, StoreInfo);
+            };
+
+            _export('StoreInfo', StoreInfo);
+
             ComponentInfo = function ComponentInfo() {
                 _classCallCheck(this, ComponentInfo);
 
@@ -762,12 +978,6 @@ System.register(['aurelia-dependency-injection', 'aurelia-event-aggregator'], fu
             };
 
             _export('ComponentInfo', ComponentInfo);
-
-            StoreInfo = function StoreInfo() {
-                _classCallCheck(this, StoreInfo);
-            };
-
-            _export('StoreInfo', StoreInfo);
 
             ComponentBuilder = (function () {
                 function ComponentBuilder(ctor, description, category) {
@@ -816,216 +1026,6 @@ System.register(['aurelia-dependency-injection', 'aurelia-event-aggregator'], fu
             };
 
             ComponentBuilder.init(C, 'Test Component').port('p1', Direction.IN);
-
-            Key = (function () {
-                function Key(id, key) {
-                    _classCallCheck(this, Key);
-
-                    this.id = id;
-                    if (key) this.cryptoKey = key;else {
-                        this.cryptoKey = {
-                            type: "",
-                            algorithm: "",
-                            extractable: true,
-                            usages: []
-                        };
-                    }
-                }
-
-                _createClass(Key, [{
-                    key: 'type',
-                    get: function get() {
-                        return this.cryptoKey.type;
-                    }
-                }, {
-                    key: 'algorithm',
-                    get: function get() {
-                        return this.cryptoKey.algorithm;
-                    }
-                }, {
-                    key: 'extractable',
-                    get: function get() {
-                        return this.cryptoKey.extractable;
-                    }
-                }, {
-                    key: 'usages',
-                    get: function get() {
-                        return this.cryptoKey.usages;
-                    }
-                }, {
-                    key: 'innerKey',
-                    get: function get() {
-                        return this.cryptoKey;
-                    }
-                }]);
-
-                return Key;
-            })();
-
-            _export('Key', Key);
-
-            PrivateKey = (function (_Key) {
-                _inherits(PrivateKey, _Key);
-
-                function PrivateKey() {
-                    _classCallCheck(this, PrivateKey);
-
-                    _Key.apply(this, arguments);
-                }
-
-                return PrivateKey;
-            })(Key);
-
-            _export('PrivateKey', PrivateKey);
-
-            PublicKey = (function (_Key2) {
-                _inherits(PublicKey, _Key2);
-
-                function PublicKey() {
-                    _classCallCheck(this, PublicKey);
-
-                    _Key2.apply(this, arguments);
-                }
-
-                return PublicKey;
-            })(Key);
-
-            _export('PublicKey', PublicKey);
-
-            KeyPair = function KeyPair() {
-                _classCallCheck(this, KeyPair);
-            };
-
-            _export('KeyPair', KeyPair);
-
-            CryptographicService = (function () {
-                function CryptographicService() {
-                    _classCallCheck(this, CryptographicService);
-
-                    this.crypto = window.crypto.subtle;
-                    if (!this.crypto && msrcrypto) this.crypto = msrcrypto;
-                }
-
-                CryptographicService.prototype.decrypt = function decrypt(algorithm, key, data) {
-                    var _this5 = this;
-
-                    return new Promise(function (resolve, reject) {
-                        _this5.crypto.decrypt(algorithm, key.innerKey, data.backingArray).then(function (res) {
-                            resolve(new ByteArray(res));
-                        })['catch'](function (err) {
-                            reject(err);
-                        });
-                    });
-                };
-
-                CryptographicService.prototype.digest = function digest(algorithm, data) {
-                    var _this6 = this;
-
-                    return new Promise(function (resolve, reject) {
-                        _this6.crypto.digest(algorithm, data.backingArray).then(function (res) {
-                            resolve(new ByteArray(res));
-                        })['catch'](function (err) {
-                            reject(err);
-                        });
-                    });
-                };
-
-                CryptographicService.prototype.encrypt = function encrypt(algorithm, key, data) {
-                    var _this7 = this;
-
-                    return new Promise(function (resolve, reject) {
-                        _this7.crypto.encrypt(algorithm, key.innerKey, data.backingArray).then(function (res) {
-                            resolve(new ByteArray(res));
-                        })['catch'](function (err) {
-                            reject(err);
-                        });
-                    });
-                };
-
-                CryptographicService.prototype.exportKey = function exportKey(format, key) {
-                    var _this8 = this;
-
-                    return new Promise(function (resolve, reject) {
-                        _this8.crypto.exportKey(format, key.innerKey).then(function (res) {
-                            resolve(new ByteArray(res));
-                        })['catch'](function (err) {
-                            reject(err);
-                        });
-                    });
-                };
-
-                CryptographicService.prototype.generateKey = function generateKey(algorithm, extractable, keyUsages) {
-                    return new Promise(function (resolve, reject) {});
-                };
-
-                CryptographicService.prototype.importKey = function importKey(format, keyData, algorithm, extractable, keyUsages) {
-                    var _this9 = this;
-
-                    return new Promise(function (resolve, reject) {
-                        _this9.crypto.importKey(format, keyData.backingArray, algorithm, extractable, keyUsages).then(function (res) {
-                            resolve(res);
-                        })['catch'](function (err) {
-                            reject(err);
-                        });
-                    });
-                };
-
-                CryptographicService.prototype.sign = function sign(algorithm, key, data) {
-                    var _this10 = this;
-
-                    return new Promise(function (resolve, reject) {
-                        _this10.crypto.sign(algorithm, key.innerKey, data.backingArray).then(function (res) {
-                            resolve(new ByteArray(res));
-                        })['catch'](function (err) {
-                            reject(err);
-                        });
-                    });
-                };
-
-                CryptographicService.prototype.verify = function verify(algorithm, key, signature, data) {
-                    var _this11 = this;
-
-                    return new Promise(function (resolve, reject) {
-                        _this11.crypto.verify(algorithm, key.innerKey, signature.backingArray, data.backingArray).then(function (res) {
-                            resolve(new ByteArray(res));
-                        })['catch'](function (err) {
-                            reject(err);
-                        });
-                    });
-                };
-
-                return CryptographicService;
-            })();
-
-            _export('CryptographicService', CryptographicService);
-
-            _export('Container', Container);
-
-            _export('inject', inject);
-
-            EventHub = (function () {
-                function EventHub() {
-                    _classCallCheck(this, EventHub);
-
-                    this._eventAggregator = new EventAggregator();
-                }
-
-                EventHub.prototype.publish = function publish(event, data) {
-                    this._eventAggregator.publish(event, data);
-                };
-
-                EventHub.prototype.subscribe = function subscribe(event, handler) {
-                    return this._eventAggregator.subscribe(event, handler);
-                };
-
-                EventHub.prototype.subscribeOnce = function subscribeOnce(event, handler) {
-                    return this._eventAggregator.subscribeOnce(event, handler);
-                };
-
-                return EventHub;
-            })();
-
-            _export('EventHub', EventHub);
 
             Port = (function () {
                 function Port(owner, endPoint) {

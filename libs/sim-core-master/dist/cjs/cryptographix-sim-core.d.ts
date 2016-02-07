@@ -42,6 +42,61 @@ declare module 'cryptographix-sim-core'
       toString(format?: number, opt?: any): string;
   }
 
+  export class Key {
+      protected id: string;
+      protected cryptoKey: CryptoKey;
+      constructor(id: string, key?: CryptoKey);
+      type: string;
+      algorithm: KeyAlgorithm;
+      extractable: boolean;
+      usages: string[];
+      innerKey: CryptoKey;
+  }
+
+
+  export class PrivateKey extends Key {
+  }
+
+
+  export class PublicKey extends Key {
+  }
+
+
+
+  export class KeyPair {
+      privateKey: PrivateKey;
+      publicKey: PublicKey;
+  }
+
+
+
+
+  export class CryptographicService {
+      protected crypto: SubtleCrypto;
+      constructor();
+      decrypt(algorithm: string | Algorithm, key: Key, data: ByteArray): Promise<ByteArray>;
+      digest(algorithm: string | Algorithm, data: ByteArray): any;
+      encrypt(algorithm: string | Algorithm, key: Key, data: ByteArray): Promise<ByteArray>;
+      exportKey(format: string, key: Key): Promise<ByteArray>;
+      generateKey(algorithm: string | Algorithm, extractable: boolean, keyUsages: string[]): Promise<Key | KeyPair>;
+      importKey(format: string, keyData: ByteArray, algorithm: string | Algorithm, extractable: boolean, keyUsages: string[]): Promise<CryptoKey>;
+      sign(algorithm: string | Algorithm, key: Key, data: ByteArray): Promise<ByteArray>;
+      verify(algorithm: string | Algorithm, key: Key, signature: ByteArray, data: ByteArray): Promise<ByteArray>;
+  }
+
+  export { Container, inject };
+  export interface Injectable {
+      new (...args: any[]): Object;
+  }
+
+  export class EventHub {
+      _eventAggregator: EventAggregator;
+      constructor();
+      publish(event: string, data?: any): void;
+      subscribe(event: string, handler: Function): Subscription;
+      subscribeOnce(event: string, handler: Function): Subscription;
+  }
+
 
   export class Enum {
   }
@@ -181,6 +236,9 @@ declare module 'cryptographix-sim-core'
       required: boolean;
   }
 
+  export class StoreInfo {
+  }
+
 
   export class ComponentInfo {
       name: string;
@@ -195,9 +253,6 @@ declare module 'cryptographix-sim-core'
           [id: string]: PortInfo;
       };
       constructor();
-  }
-
-  export class StoreInfo {
   }
 
 
@@ -226,61 +281,6 @@ declare module 'cryptographix-sim-core'
   export interface ComponentConstructor {
       new (...args: any[]): Component;
       componentInfo?: ComponentInfo;
-  }
-
-  export class Key {
-      protected id: string;
-      protected cryptoKey: CryptoKey;
-      constructor(id: string, key?: CryptoKey);
-      type: string;
-      algorithm: KeyAlgorithm;
-      extractable: boolean;
-      usages: string[];
-      innerKey: CryptoKey;
-  }
-
-
-  export class PrivateKey extends Key {
-  }
-
-
-  export class PublicKey extends Key {
-  }
-
-
-
-  export class KeyPair {
-      privateKey: PrivateKey;
-      publicKey: PublicKey;
-  }
-
-
-
-
-  export class CryptographicService {
-      protected crypto: SubtleCrypto;
-      constructor();
-      decrypt(algorithm: string | Algorithm, key: Key, data: ByteArray): Promise<ByteArray>;
-      digest(algorithm: string | Algorithm, data: ByteArray): any;
-      encrypt(algorithm: string | Algorithm, key: Key, data: ByteArray): Promise<ByteArray>;
-      exportKey(format: string, key: Key): Promise<ByteArray>;
-      generateKey(algorithm: string | Algorithm, extractable: boolean, keyUsages: string[]): Promise<Key | KeyPair>;
-      importKey(format: string, keyData: ByteArray, algorithm: string | Algorithm, extractable: boolean, keyUsages: string[]): Promise<CryptoKey>;
-      sign(algorithm: string | Algorithm, key: Key, data: ByteArray): Promise<ByteArray>;
-      verify(algorithm: string | Algorithm, key: Key, signature: ByteArray, data: ByteArray): Promise<ByteArray>;
-  }
-
-  export { Container, inject };
-  export interface Injectable {
-      new (...args: any[]): Object;
-  }
-
-  export class EventHub {
-      _eventAggregator: EventAggregator;
-      constructor();
-      publish(event: string, data?: any): void;
-      subscribe(event: string, handler: Function): Subscription;
-      subscribeOnce(event: string, handler: Function): Subscription;
   }
 
 

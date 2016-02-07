@@ -92,6 +92,7 @@ body {
   background-color: white;
   border: 3px solid #77aca7;
   border-radius: 20px;
+  transition: width 0.4s, height 0.4s, border-radius 0.4s;
 }
 
 .componentName {
@@ -100,6 +101,7 @@ body {
   font-size: 40px;
   text-align: center; 
   margin-top: 17px;
+  transition: font-size 0.4s, margin-top 0.4s;
 }
 
 section {
@@ -109,7 +111,6 @@ section {
 .navbar-nav li.loader {
   margin: 12px 24px 0 6px;
 }
-
 
 /* css for page transition animations */
 

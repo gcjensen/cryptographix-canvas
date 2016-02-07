@@ -3,6 +3,7 @@ import {DialogService} from 'aurelia-dialog';
 import {LinkConfigDialog} from './link-config-dialog';
 import {Network, Node, Link, Direction} from '../libs/sim-core-master/dist/cryptographix-sim-core';
 import {NodeElement} from 'node-element';
+import {Zoomer} from 'zoomer';
 
 @autoinject
 @containerless()
@@ -14,10 +15,12 @@ export class Canvas {
   private nodes = [];
   private taskQueue: TaskQueue;
   private dialogService: DialogService;
+  private isDragging = false;
+
 
   constructor(taskQueue: TaskQueue, dialogService: DialogService) {
     this.taskQueue = taskQueue;
-    this.dialogService = dialogService;
+    this.dialogService = dialogService
   }
 
   attached() {
@@ -52,21 +55,35 @@ export class Canvas {
     this.registerEvents();
   }
 
+  zoom(node: Node) {
+    // check to prevent dragging event from causing a zoom
+    if (!this.isDragging) {
+      if (!this.isZoomedIn(node)) {
+        Zoomer.zoomIn(node, this.nodes, 3);
+      } else {
+        Zoomer.zoomOut(this.nodes);
+      }
+    }
+    this.isDragging = false;
+  }
+
+
   configureDomElement(node: Node) {
-    let nodeElement = document.getElementById(node.id)
+    let nodeElement = document.getElementById(node.id);
     nodeElement.style.left = node.metadata.view.x;
     nodeElement.style.top = node.metadata.view.y;
     nodeElement.style.width = node.metadata.view.width;
-    nodeElement.style.height = node.metadata.view.height;    
+    nodeElement.style.height = node.metadata.view.height;
 
+    var self = this;
     jsPlumb.draggable(node.id, {
       stop: function(e) {
         node.metadata.view.x = e.pos[0];    
         node.metadata.view.y = e.pos[1];
+        self.isDragging = true;
       }
     });
   }
-
 
   addPortsToNode(node: Node) {
     var portsArray = this.sortPorts(node.ports);
@@ -97,12 +114,12 @@ export class Canvas {
             isSource: portArray[0].direction === Direction.OUT,
             isTarget:portArray[0].direction === Direction.IN,           
             maxConnections: -1, // no limit
-            paintStyle: { fillStyle: "#77aca7 ", radius: 3 },
+            paintStyle: { fillStyle: "#77aca7", radius: 3 },
             hoverPaintStyle: { fillStyle: "#77aca7", radius: 6 },
             connectorStyle: { strokeStyle: "#77aca7", lineWidth: 2 },
-            connectorHoverStyle: { lineWidth: 4 }
+            connectorHoverStyle: { lineWidth: 2 }
           });
-        }
+          }
       }
     }
   }
@@ -192,13 +209,11 @@ export class Canvas {
         to: { nodeID: targetEndPointID.split("-")[0], portID: targetEndPointID.split("-")[1] }
       });
     }
-
-    // improve the above to remove large amount of repeated code
+    // repeated code is necessary, otherwise the link would be added before it gets the ID supplied by the user
   }
 
   removeLink(linkID: string) {  
     this.network.graph.removeLink(linkID);
-    console.log("removed " + linkID);
   }
 
   changeLink(data: any) { 
@@ -212,6 +227,10 @@ export class Canvas {
       isNew = link._id !== linkID; 
     });
     return isNew;
+  }
+
+  isZoomedIn(node: Node) {
+    return document.getElementById(node.id).style.width !== node.metadata.view.width;
   }
 
 }

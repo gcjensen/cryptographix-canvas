@@ -1,7 +1,7 @@
 System.register(["cryptographix-sim-core"], function (_export) {
     "use strict";
 
-    var Container, inject, ByteArray, Graph, Node, Port, Direction, Network, ComponentFactory, RunState, Channel, EndPoint, Message, __decorate, __metadata, C1, C2, jsonGraph1, __decorate, __metadata, gr1, C, __decorate, __metadata, StateLogger, IntegerMessage;
+    var Container, inject, Graph, Node, Port, Direction, Network, ComponentFactory, RunState, Channel, EndPoint, Message, ByteArray, __decorate, __metadata, C1, C2, jsonGraph1, IntegerMessage, __decorate, __metadata, gr1, C, __decorate, __metadata, StateLogger;
 
     function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
@@ -11,7 +11,6 @@ System.register(["cryptographix-sim-core"], function (_export) {
         setters: [function (_cryptographixSimCore) {
             Container = _cryptographixSimCore.Container;
             inject = _cryptographixSimCore.inject;
-            ByteArray = _cryptographixSimCore.ByteArray;
             Graph = _cryptographixSimCore.Graph;
             Node = _cryptographixSimCore.Node;
             Port = _cryptographixSimCore.Port;
@@ -22,6 +21,7 @@ System.register(["cryptographix-sim-core"], function (_export) {
             Channel = _cryptographixSimCore.Channel;
             EndPoint = _cryptographixSimCore.EndPoint;
             Message = _cryptographixSimCore.Message;
+            ByteArray = _cryptographixSimCore.ByteArray;
         }],
         execute: function () {
             __decorate = undefined && undefined.__decorate || function (decorators, target, key, desc) {
@@ -52,32 +52,6 @@ System.register(["cryptographix-sim-core"], function (_export) {
                     var jector = new Container();
                     var c2 = jector.invoke(C2);
                     expect(c2.c1 instanceof C1).toBe(true);
-                });
-            });
-
-            describe('A ByteArray', function () {
-                it('stores a sequence of bytes', function () {
-                    var bs = new ByteArray([0, 1, 2, 3, 4]);
-                    expect(bs.toString()).toBe("0001020304");
-                });
-                it('can be instanciated from an array of bytes', function () {
-                    var bs = new ByteArray([0, 1, 2, 3, 4]);
-                    expect(bs.toString()).toBe("0001020304");
-                    var bytes = [];
-                    for (var i = 0; i < 10000; ++i) {
-                        bytes[i] = i & 0xff;
-                    }bs = new ByteArray(bytes);
-                    expect(bs.length).toBe(10000);
-                });
-                it('can be compared (equal)', function () {
-                    var bs1 = new ByteArray([0, 1, 2, 3, 4]);
-                    var bs2 = new ByteArray("00 01 02 03 04", ByteArray.HEX);
-                    var bs3 = bs1.clone().setByteAt(1, 0x99);
-
-                    expect(bs1.equals(bs1)).toBe(true);
-
-                    expect(bs1.equals(bs2)).toBe(true);
-                    expect(bs1.equals(bs3)).not.toBe(true);
                 });
             });
 
@@ -260,6 +234,175 @@ System.register(["cryptographix-sim-core"], function (_export) {
                 });
             });
 
+            IntegerMessage = (function (_Message) {
+                _inherits(IntegerMessage, _Message);
+
+                function IntegerMessage(value) {
+                    _classCallCheck(this, IntegerMessage);
+
+                    _Message.call(this, undefined, value);
+                }
+
+                return IntegerMessage;
+            })(Message);
+
+            describe('A Channel', function () {
+                describe('can be active or inactive', function () {
+                    var ch = new Channel();
+                    it('is initially inactive', function () {
+                        expect(ch.active).toBe(false);
+                    });
+                    it('can be activated', function () {
+                        expect(ch.active).toBe(false);
+                        ch.activate();
+                        expect(ch.active).toBe(true);
+                        ch.activate();
+                        expect(ch.active).toBe(true);
+                    });
+                    it('can be deactivated', function () {
+                        expect(ch.active).toBe(true);
+                        ch.deactivate();
+                        expect(ch.active).toBe(false);
+                        ch.deactivate();
+                        expect(ch.active).toBe(false);
+                    });
+                });
+                describe('has a registry of EndPoints', function () {
+                    var ch = new Channel();
+                    var ep1 = new EndPoint('ep1');
+                    var ep2 = new EndPoint('ep2');
+                    it('to which EndPoints can be added', function () {
+                        ch.addEndPoint(ep1);
+                        expect(ch.endPoints.length).toBe(1);
+
+                        ch.addEndPoint(ep2);
+                        expect(ch.endPoints.length).toBe(2);
+                    });
+                    it('... and removed', function () {
+                        ch.removeEndPoint(ep1);
+                        expect(ch.endPoints).toContain(ep2);
+                        ch.removeEndPoint(ep2);
+                        expect(ch.endPoints.length).toBe(0);
+                    });
+                    it('... even when Channel is activated', function () {
+                        ch.activate();
+                        expect(ch.active).toBe(true);
+                        ch.addEndPoint(new EndPoint('epx'));
+                        ch.addEndPoint(new EndPoint('epx'));
+                        ch.addEndPoint(ep1);
+                        expect(ch.endPoints).toContain(ep1);
+                        expect(ch.endPoints.length).toBe(3);
+                        ch.removeEndPoint(ep1);
+                        expect(ch.endPoints).not.toContain(ep1);
+                        ch.shutdown();
+                        expect(ch.endPoints.length).toBe(0);
+                    });
+                });
+                describe('communicates between INOUT endpoints', function () {
+                    var ch = new Channel();
+                    var ep1 = new EndPoint('ep1', Direction.INOUT);
+                    var ep2 = new EndPoint('ep2', Direction.INOUT);
+                    ep1.attach(ch);
+                    ep2.attach(ch);
+                    ch.activate();
+                    it('can send messages from 1(IO) to 2(IO)', function (done) {
+                        ep2.onMessage(function (m) {
+                            expect(m).toBeDefined();done();
+                        });
+                        ep1.sendMessage(new IntegerMessage(101));
+                    });
+                    it('can send messages from 2(IO) to 1(IO)', function (done) {
+                        ep1.onMessage(function (m) {
+                            expect(m).toBeDefined();done();
+                        });
+                        ep2.sendMessage(new IntegerMessage(102));
+                    });
+                    it('can send messages from 1(IO) to 2(IO) and back to 1(IO)', function (done) {
+                        ep2.onMessage(function (m, ep) {
+                            ep2.sendMessage(m);
+                        });
+                        ep1.sendMessage(new IntegerMessage(100));
+                        ep1.onMessage(function (m) {
+                            expect(m).toBeDefined();done();
+                        });
+                    });
+                });
+                describe('communicates from OUT to IN', function () {
+                    var ch = new Channel();
+                    var ep1 = new EndPoint('ep1', Direction.OUT);
+                    var ep2 = new EndPoint('ep2', Direction.IN);
+                    ep1.attach(ch);
+                    ep2.attach(ch);
+                    ch.activate();
+                    it('can send messages from (OUT) to (IN)', function (done) {
+                        ep2.onMessage(function (m) {
+                            expect(m).toBeDefined();done();
+                        });
+                        ep1.sendMessage(new IntegerMessage(101));
+                    });
+                    it('cannot send messages from (IN) to (OUT)', function () {
+                        expect(function () {
+                            ep2.sendMessage(new IntegerMessage(102));
+                        }).toThrow();
+                    });
+                    it('can reply, messages from (OUT) to (IN) and respond to (OUT)', function (done) {
+                        ep2.onMessage(function (m, ep) {
+                            m.header.isResponse = true;ep2.sendMessage(m);
+                        });
+                        ep1.sendMessage(new IntegerMessage(100));
+                        ep1.onMessage(function (m) {
+                            expect(m).toBeDefined();done();
+                        });
+                    });
+                });
+                describe('can distribute to multiple endpoints', function () {
+                    var ch = new Channel();
+                    var ep1 = new EndPoint('ep1', Direction.OUT);
+                    var ep2 = new EndPoint('ep2', Direction.IN);
+                    var ep3 = new EndPoint('ep3', Direction.IN);
+                    ep1.attach(ch);
+                    ep2.attach(ch);
+                    ep3.attach(ch);
+                    ch.activate();
+                    it('can send messages from 1 to 2', function (done) {
+                        var rcv = 0;
+                        ep2.onMessage(function (m) {
+                            expect(m).toBeDefined();if (++rcv == 2) done();
+                        });
+                        ep3.onMessage(function (m) {
+                            expect(m).toBeDefined();if (++rcv == 2) done();
+                        });
+                        ep1.sendMessage(new IntegerMessage(120));
+                    });
+                });
+            });
+
+            describe('A ByteArray', function () {
+                it('stores a sequence of bytes', function () {
+                    var bs = new ByteArray([0, 1, 2, 3, 4]);
+                    expect(bs.toString()).toBe("0001020304");
+                });
+                it('can be instanciated from an array of bytes', function () {
+                    var bs = new ByteArray([0, 1, 2, 3, 4]);
+                    expect(bs.toString()).toBe("0001020304");
+                    var bytes = [];
+                    for (var i = 0; i < 10000; ++i) {
+                        bytes[i] = i & 0xff;
+                    }bs = new ByteArray(bytes);
+                    expect(bs.length).toBe(10000);
+                });
+                it('can be compared (equal)', function () {
+                    var bs1 = new ByteArray([0, 1, 2, 3, 4]);
+                    var bs2 = new ByteArray("00 01 02 03 04", ByteArray.HEX);
+                    var bs3 = bs1.clone().setByteAt(1, 0x99);
+
+                    expect(bs1.equals(bs1)).toBe(true);
+
+                    expect(bs1.equals(bs2)).toBe(true);
+                    expect(bs1.equals(bs3)).not.toBe(true);
+                });
+            });
+
             __decorate = undefined && undefined.__decorate || function (decorators, target, key, desc) {
                 var c = arguments.length,
                     r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
@@ -421,149 +564,6 @@ System.register(["cryptographix-sim-core"], function (_export) {
                         }).then(function () {
                             done();
                         });
-                    });
-                });
-            });
-
-            IntegerMessage = (function (_Message) {
-                _inherits(IntegerMessage, _Message);
-
-                function IntegerMessage(value) {
-                    _classCallCheck(this, IntegerMessage);
-
-                    _Message.call(this, undefined, value);
-                }
-
-                return IntegerMessage;
-            })(Message);
-
-            describe('A Channel', function () {
-                describe('can be active or inactive', function () {
-                    var ch = new Channel();
-                    it('is initially inactive', function () {
-                        expect(ch.active).toBe(false);
-                    });
-                    it('can be activated', function () {
-                        expect(ch.active).toBe(false);
-                        ch.activate();
-                        expect(ch.active).toBe(true);
-                        ch.activate();
-                        expect(ch.active).toBe(true);
-                    });
-                    it('can be deactivated', function () {
-                        expect(ch.active).toBe(true);
-                        ch.deactivate();
-                        expect(ch.active).toBe(false);
-                        ch.deactivate();
-                        expect(ch.active).toBe(false);
-                    });
-                });
-                describe('has a registry of EndPoints', function () {
-                    var ch = new Channel();
-                    var ep1 = new EndPoint('ep1');
-                    var ep2 = new EndPoint('ep2');
-                    it('to which EndPoints can be added', function () {
-                        ch.addEndPoint(ep1);
-                        expect(ch.endPoints.length).toBe(1);
-
-                        ch.addEndPoint(ep2);
-                        expect(ch.endPoints.length).toBe(2);
-                    });
-                    it('... and removed', function () {
-                        ch.removeEndPoint(ep1);
-                        expect(ch.endPoints).toContain(ep2);
-                        ch.removeEndPoint(ep2);
-                        expect(ch.endPoints.length).toBe(0);
-                    });
-                    it('... even when Channel is activated', function () {
-                        ch.activate();
-                        expect(ch.active).toBe(true);
-                        ch.addEndPoint(new EndPoint('epx'));
-                        ch.addEndPoint(new EndPoint('epx'));
-                        ch.addEndPoint(ep1);
-                        expect(ch.endPoints).toContain(ep1);
-                        expect(ch.endPoints.length).toBe(3);
-                        ch.removeEndPoint(ep1);
-                        expect(ch.endPoints).not.toContain(ep1);
-                        ch.shutdown();
-                        expect(ch.endPoints.length).toBe(0);
-                    });
-                });
-                describe('communicates between INOUT endpoints', function () {
-                    var ch = new Channel();
-                    var ep1 = new EndPoint('ep1', Direction.INOUT);
-                    var ep2 = new EndPoint('ep2', Direction.INOUT);
-                    ep1.attach(ch);
-                    ep2.attach(ch);
-                    ch.activate();
-                    it('can send messages from 1(IO) to 2(IO)', function (done) {
-                        ep2.onMessage(function (m) {
-                            expect(m).toBeDefined();done();
-                        });
-                        ep1.sendMessage(new IntegerMessage(101));
-                    });
-                    it('can send messages from 2(IO) to 1(IO)', function (done) {
-                        ep1.onMessage(function (m) {
-                            expect(m).toBeDefined();done();
-                        });
-                        ep2.sendMessage(new IntegerMessage(102));
-                    });
-                    it('can send messages from 1(IO) to 2(IO) and back to 1(IO)', function (done) {
-                        ep2.onMessage(function (m, ep) {
-                            ep2.sendMessage(m);
-                        });
-                        ep1.sendMessage(new IntegerMessage(100));
-                        ep1.onMessage(function (m) {
-                            expect(m).toBeDefined();done();
-                        });
-                    });
-                });
-                describe('communicates from OUT to IN', function () {
-                    var ch = new Channel();
-                    var ep1 = new EndPoint('ep1', Direction.OUT);
-                    var ep2 = new EndPoint('ep2', Direction.IN);
-                    ep1.attach(ch);
-                    ep2.attach(ch);
-                    ch.activate();
-                    it('can send messages from (OUT) to (IN)', function (done) {
-                        ep2.onMessage(function (m) {
-                            expect(m).toBeDefined();done();
-                        });
-                        ep1.sendMessage(new IntegerMessage(101));
-                    });
-                    it('cannot send messages from (IN) to (OUT)', function () {
-                        expect(function () {
-                            ep2.sendMessage(new IntegerMessage(102));
-                        }).toThrow();
-                    });
-                    it('can reply, messages from (OUT) to (IN) and respond to (OUT)', function (done) {
-                        ep2.onMessage(function (m, ep) {
-                            m.header.isResponse = true;ep2.sendMessage(m);
-                        });
-                        ep1.sendMessage(new IntegerMessage(100));
-                        ep1.onMessage(function (m) {
-                            expect(m).toBeDefined();done();
-                        });
-                    });
-                });
-                describe('can distribute to multiple endpoints', function () {
-                    var ch = new Channel();
-                    var ep1 = new EndPoint('ep1', Direction.OUT);
-                    var ep2 = new EndPoint('ep2', Direction.IN);
-                    var ep3 = new EndPoint('ep3', Direction.IN);
-                    ep1.attach(ch);
-                    ep2.attach(ch);
-                    ep3.attach(ch);
-                    ch.activate();
-                    it('can send messages from 1 to 2', function (done) {
-                        var rcv = 0;
-                        ep2.onMessage(function (m) {
-                            expect(m).toBeDefined();if (++rcv == 2) done();
-                        });
-                        ep3.onMessage(function (m) {
-                            expect(m).toBeDefined();if (++rcv == 2) done();
-                        });
-                        ep1.sendMessage(new IntegerMessage(120));
                     });
                 });
             });
