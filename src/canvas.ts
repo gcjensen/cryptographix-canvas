@@ -117,7 +117,7 @@ export class Canvas {
             paintStyle: { fillStyle: "#77aca7", radius: 3 },
             hoverPaintStyle: { fillStyle: "#77aca7", radius: 6 },
             connectorStyle: { strokeStyle: "#77aca7", lineWidth: 2 },
-            connectorHoverStyle: { lineWidth: 2 }
+            connectorHoverStyle: { lineWidth: 4 }
           });
           }
       }
