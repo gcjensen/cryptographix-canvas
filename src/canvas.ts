@@ -1,9 +1,9 @@
 import {autoinject, customElement, bindable, containerless, TaskQueue} from 'aurelia-framework';
 import {DialogService} from 'aurelia-dialog';
 import {LinkConfigDialog} from './link-config-dialog';
-import {Network, Node, Link, Direction} from '../libs/sim-core-master/dist/cryptographix-sim-core';
-import {NodeElement} from 'node-element';
-import {Zoomer} from 'zoomer';
+import {AddNodeDialog} from './add-node-dialog';
+import {Network, Node, Link, Direction} from 'cryptographix-sim-core';
+import {Animation} from './animation';
 
 @autoinject
 @containerless()
@@ -17,7 +17,6 @@ export class Canvas {
   private dialogService: DialogService;
   private isDragging = false;
 
-
   constructor(taskQueue: TaskQueue, dialogService: DialogService) {
     this.taskQueue = taskQueue;
     this.dialogService = dialogService
@@ -25,7 +24,7 @@ export class Canvas {
 
   attached() {
     // the network object has been bound to canvas in the view
-    this.network.loadComponents().then(()=> {
+    this.network.loadComponents().then(() => {
       this.network.initialize();  
 
       this.network.graph.nodes.forEach(node => {
@@ -59,9 +58,9 @@ export class Canvas {
     // check to prevent dragging event from causing a zoom
     if (!this.isDragging) {
       if (!this.isZoomedIn(node)) {
-        Zoomer.zoomIn(node, this.nodes, 3);
+        Animation.zoomIn(node, this.nodes, 3);
       } else {
-        Zoomer.zoomOut(this.nodes);
+        Animation.zoomOut(this.nodes);
       }
     }
     this.isDragging = false;
@@ -70,10 +69,10 @@ export class Canvas {
 
   configureDomElement(node: Node) {
     let nodeElement = document.getElementById(node.id);
-    nodeElement.style.left = node.metadata.view.x;
-    nodeElement.style.top = node.metadata.view.y;
-    nodeElement.style.width = node.metadata.view.width;
-    nodeElement.style.height = node.metadata.view.height;
+    nodeElement.style.left = parseInt(node.metadata.view.x) + "px";
+    nodeElement.style.top = parseInt(node.metadata.view.y) + "px";
+    nodeElement.style.width = parseInt(node.metadata.view.width) + "px";
+    nodeElement.style.height = parseInt(node.metadata.view.height) + "px";
 
     var self = this;
     jsPlumb.draggable(node.id, {
@@ -81,7 +80,7 @@ export class Canvas {
         node.metadata.view.x = e.pos[0];    
         node.metadata.view.y = e.pos[1];
         self.isDragging = true;
-      }
+        }
     });
   }
 
@@ -114,24 +113,24 @@ export class Canvas {
             isSource: portArray[0].direction === Direction.OUT,
             isTarget:portArray[0].direction === Direction.IN,           
             maxConnections: -1, // no limit
-            paintStyle: { fillStyle: "#77aca7", radius: 3 },
-            hoverPaintStyle: { fillStyle: "#77aca7", radius: 6 },
-            connectorStyle: { strokeStyle: "#77aca7", lineWidth: 2 },
-            connectorHoverStyle: { lineWidth: 4 }
+            paintStyle: { fillStyle: "#77aca7", radius: 4 },
+            hoverPaintStyle: { fillStyle: "#77aca7", radius: 8 },
+            connectorStyle: { strokeStyle: "#77aca7", lineWidth: 4 },
+            connectorHoverStyle: { lineWidth: 8 }
           });
           }
       }
     }
   }
 
-  connectNodes(links: Link[]) {
+  connectNodes(links: Map<string, Link>) {
     links.forEach(function(link) {
       (jsPlumb.connect({
         uuids: [link.fromNode.id + "-" + link.fromPort.id, link.toNode.id + "-" + link.toPort.id],
-        endpointStyle: { fillStyle: "#77aca7", radius: 3 },
-        hoverPaintStyle: { radius: 6 },
-        paintStyle: { strokeStyle: "#77aca7", lineWidth: 2 },
-      }) as any).id = link._id; 
+        endpointStyle: { fillStyle: "#77aca7", radius: 4 },
+        hoverPaintStyle: { radius: 8 },
+        paintStyle: { strokeStyle: "#77aca7", lineWidth: 4 }
+      }) as any).id = link.toObject()["id"]; 
       // connection is cast to any, because jsPlumb typescript definitions don't include .id for some reason     
     });
   }
@@ -183,6 +182,13 @@ export class Canvas {
     });
   }
 
+  addNode() {
+   this.dialogService.open({ viewModel: AddNodeDialog }).then(response => {
+     // need to obtain components to populate dialog
+   });
+  }
+
+
   createLink(sourceEndPointID: any, targetEndPointID: any, linkID: string) {
     
     if (!linkID) {     
@@ -224,7 +230,7 @@ export class Canvas {
   isNewConnection(linkID: any) {
     var isNew: Boolean;
     this.network.graph.links.forEach(link => {  
-      isNew = link._id !== linkID; 
+      isNew = link.toObject()["id"] !== linkID; 
     });
     return isNew;
   }

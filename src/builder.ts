@@ -1,5 +1,5 @@
 import {autoinject} from 'aurelia-framework';
-import {Network, Graph, Direction, ComponentFactory, Kind, Node} from '../libs/sim-core-master/dist/cryptographix-sim-core';
+import {Network, Graph, Direction, ComponentFactory, Kind, Node} from 'cryptographix-sim-core';
 
 @autoinject
 // currently the work could all be done in Canvas, but Builder may be needed later
@@ -38,7 +38,7 @@ export class Builder {
 
   // temporary function to enable testing of graph modifications
   printGraphObject() {
-    console.log(this.network.graph.toObject());
+    console.log(this.network.graph.toObject({}));
   }
 
 }	

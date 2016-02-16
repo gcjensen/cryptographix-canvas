@@ -1,5 +1,6 @@
 <template>
   <require from="node-element"></require>
+    <button type="button" class="btn btn-circle btn-lg btn-add" click.trigger="addNode()"><i class="fa fa-plus"></i></button> 
     <node-element click.trigger="zoom(node)" repeat.for="node of nodes" node.bind="node"></node>
   </div>
 </template>

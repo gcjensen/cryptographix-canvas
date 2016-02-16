@@ -71,10 +71,17 @@ body {
   line-height: 1.33;
   border-radius: 25px;
   position: absolute;
-  top: 15px;
   right: 15px;
   background-color: #77aca7;
   color: white;
+}
+
+.btn-print {
+  top: 15px;
+}
+
+.btn-add {
+  top: 80px;
 }
 
 .btn-circle.btn-lg:hover {
