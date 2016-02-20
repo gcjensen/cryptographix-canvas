@@ -8,32 +8,43 @@ Author: George Jensen
 To run the app, follow these steps.
 
 1. Ensure NodeJS is installed.
-2. Navigate to the project directory and execute:
+2. Ensure [MongoDB](https://docs.mongodb.org/manual/tutorial/install-mongodb-on-os-x/#install-mongodb-manually) is installed and configured. 
+3. Navigate to the server directory and execute
 
   ```shell
   npm install
   ```
-3. Install Gulp globally:
+4. To start the server, execute:
+ 
+  ```shell
+  node server.js
+  ```
+5. Navigate to the client directory and execute:
+
+  ```shell
+  npm install
+  ```
+6. Install Gulp globally:
 
   ```shell
   npm install -g gulp
   ```
 
-4. Install jspm globally:
+7. Install jspm globally:
 
   ```shell
   npm install -g jspm
   ```
   
-5. Install the client-side dependencies with jspm:
+8. Install the client-side dependencies with jspm:
 
   ```shell
   jspm install -y
   ```
 
-6. To run the app, execute:
+9. To run the app, execute:
 
   ```shell
   gulp watch
   ```
-7. Browse to [http://localhost:9000](http://localhost:9000). 
+10. Browse to [http://localhost:9000](http://localhost:9000). 
