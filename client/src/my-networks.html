@@ -1,0 +1,48 @@
+<template>
+  <require from="canvas"></require>
+  <require from="network-thumbnail"></require>
+  <section class="au-animate">
+
+    <!-- this navbar should be made into its own custom element -->
+    <nav class="navbar navbar-default navbar-fixed-top second-navbar" role="navigation">
+      <div class="container-fluid">
+        <!-- button and label on the left side of the navbar -->
+        <div class="navbar-collapse collapse navbar-left">
+          <ul class="nav navbar-nav">
+            <button if.bind="graphSelected" click.trigger="back()" type="button" class="btn navbar-btn">
+              <i class="fa fa-chevron-left"></i>
+              <span>Back</span> 
+            </button>
+          </ul>
+        </div>
+        <div class="navbar-header">
+          <a class="navbar-brand">
+            <span class="second-navbar-brand">${label}</span>
+          </a>
+        </div>
+        <!-- buttons on the right side of the navbar -->
+        <div class="navbar-collapse collapse navbar-right">
+          <ul class="nav navbar-nav">    
+            <button if.bind="!graphSelected" type="button" class="btn navbar-btn">
+              <i class="fa fa-plus"></i>
+              <span>New Network</span>
+            </button>
+            <button if.bind="graphSelected" click.trigger="save()" type="button" class="btn navbar-btn">
+              <i class="fa fa-floppy-o"></i>
+              <span>Save</span>
+            </button>
+          </ul>
+        </div>
+      </div>
+    </nav>
+        
+    <!-- depending on the value of graphSelected, either thumbnails are shown for the users networks,
+         or the canvas is shown for the selected network -->
+
+    <canvas if.bind="graphSelected" network.bind="network"></canvas>
+
+    <network-thumbnail repeat.for="network of networks" click.trigger="loadNetwork(network)" if.bind="!graphSelected" network.bind="network" style.bind="nodeStyle"></network-thumbnail>
+
+  </section>
+</template>
+

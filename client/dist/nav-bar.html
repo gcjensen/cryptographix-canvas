@@ -1,0 +1,28 @@
+<template bindable="router">
+  <nav class="main-navbar navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-center navbar-brand main-navbar-brand" href="#">
+          <span>${router.title}</span>
+        </a>
+      </div>
+
+      <div class="navbar-collapse collapse navbar-right">
+        <ul class="nav navbar-nav">
+          <li repeat.for="row of router.navigation" class="navbar-links">
+            <a data-toggle="collapse" data-target="#navbar-collapse.in" href.bind="row.href" class="${row.isActive ? 'selected' : ''}">
+                <i class="fa fa-${row.settings}"></i>
+                <span>${row.title}</span>
+            </a>
+          </li>
+        </ul>
+
+        <ul class="nav navbar-nav navbar-left">
+          <li class="loader" if.bind="router.isNavigating">
+            <i class="fa fa-circle-o-notch fa-spin fa-2x"></i>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</template>

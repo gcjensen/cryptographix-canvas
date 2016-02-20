@@ -1,0 +1,16 @@
+<template>
+  <ai-dialog style="width:30%">
+    <ai-dialog-body>
+      <h2>Configure your new link</h2>
+      <div class="input-group">
+        <span class="input-group-addon" id="basic-addon1">ID</span>
+        <input value.bind="linkID" type="text" class="form-control" aria-describedby="basic-addon1">
+      </div>
+    </ai-dialog-body>
+
+    <ai-dialog-footer>
+      <button click.trigger="controller.cancel()">Cancel</button>
+      <button click.trigger="controller.ok(linkID)">Ok</button>
+    </ai-dialog-footer>
+  </ai-dialog>
+</template>

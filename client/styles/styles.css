@@ -1,0 +1,230 @@
+body {
+  margin: 0;
+  background-color: #626a6a;
+  cursor: default;
+}
+
+.splash {
+  text-align: center;
+  margin: 10% 0 0 0;
+  box-sizing: border-box;
+}
+
+.splash .message {
+  color: white;
+  font-size: 72px;
+  line-height: 72px;
+  text-shadow: rgba(0, 0, 0, 0.5) 0 0 15px;
+  font-family: Oswald;
+}
+
+.splash .fa-circle-o-notch {
+  color: white;
+  text-align: center;
+  display: inline-block;
+  font-size: 72px;
+  margin-top: 50px;
+}
+
+.page-host {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50px;
+  bottom: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: #626a6a;
+}
+
+.main-navbar-brand {
+  float: none;
+  margin-top: 5px !important;
+  color: white !important; 
+  font-weight: 500 !important; 
+  font-size: 25px !important;
+  font-family: Oswald;
+}
+
+
+.navbar-center {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 0;
+  text-align: center;
+  margin: auto;
+  height:100%;
+}
+
+.main-navbar {
+  height:60px; 
+  background-color:#77aca7 !important; 
+  border-bottom: thin solid #626a6a !important;
+}
+
+.navbar-links {
+  margin-top: 5px;
+  color: #dadcda !important;
+}
+
+.selected {
+  color: white !important;
+}
+
+.second-navbar {
+  margin-top: 60px; 
+  background-color: #c7d8d8 !important;
+}
+
+.second-navbar-brand {
+  color:black; 
+  font-size: 16px; 
+  margin-left: 15px; 
+  font-weight: 500;
+}
+
+.navbar-btn {
+  margin-top: 7px; 
+  background-color: #77aca7; 
+  color:white;
+}
+
+.page-title {
+  font-family: Oswald;
+  color: #6b7575;
+  font-size: 100px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  line-height: 10px;
+  text-align: center; 
+  margin-top: 60px;
+  text-transform: uppercase;
+}
+
+.panel {
+  display: inline-block; 
+  width: 300px; 
+  margin-top: 120px; 
+  margin-left: 20px; 
+  border: 0 !important; 
+}
+
+.panel-body {
+  height: 100px; 
+  background-color: #c7d8d8;
+}
+
+.panel-body:hover {
+  opacity: 0.6;
+}
+
+.panel-footer {
+  color: white; 
+  background-color: #77aca7 !important;
+}
+
+.btn-circle.btn-lg {
+  width: 50px;
+  height: 50px;
+  padding: 10px 16px;
+  font-size: 18px;
+  line-height: 1.33;
+  border-radius: 25px;
+  position: absolute;
+  right: 15px;
+  background-color: #77aca7;
+  color: white;
+}
+
+.btn-print {
+  top: 15px;
+}
+
+.btn-add {
+  top: 80px;
+}
+
+.btn-circle.btn-lg:hover {
+  background-color: white;
+  color: #77aca7;
+}
+
+.btn-circle.btn-lg:focus {
+  outline: 0 !important;
+}
+
+
+.node-regular {
+  position: absolute;
+  background-color: white;
+  border: 3px solid #77aca7;
+  background-color: white;
+  border-radius: 20px;
+  transition: width 0.4s, height 0.4s, border-radius 0.4s;
+}
+
+.node-thumbnail {
+  display: inline-block;
+  background-color: white;
+  border: 1.5px solid #77aca7;
+  border-radius: 8px;
+  margin-left: 5px;
+  transition: width 0.4s, height 0.4s, border-radius 0.4s;
+}
+
+.node-regular > .component-name {
+  font-family: Oswald;
+  color: #77aca7;
+  font-size: 40px;
+  text-align: center; 
+  margin-top: 17px;
+  -webkit-user-select: none;
+  transition: font-size 0.4s, margin-top 0.4s;
+}
+
+.node-thumbnail > .component-name {
+  font-family: Oswald;
+  color: #77aca7;
+  font-size: 20px;
+  text-align: center; 
+  margin-top: 9px;
+  -webkit-user-select: none;      
+  transition: font-size 0.4s, margin-top 0.4s;
+}
+
+section {
+  margin: 0 20px;
+}
+
+.navbar-nav li.loader {
+  margin-top: 15px;
+  color: white;
+}
+
+/* css for page transition animations */
+
+section.au-enter-active {
+  -webkit-animation: fadeIn 1s;
+  animation: fadeIn 1s;
+}
+
+@-webkit-keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
