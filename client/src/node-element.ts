@@ -7,7 +7,7 @@ import {Node} from 'cryptographix-sim-core';
 @bindable('style')
 export class NodeElement {
   
-  public node: Node;
-  public style: string;
+  node: Node;
+  style: string;
 
 }

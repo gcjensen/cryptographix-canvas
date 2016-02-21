@@ -7,10 +7,10 @@ import {Network, Node} from 'cryptographix-sim-core';
 @bindable('network')
 export class NetworkThumbnail {
   
-  private network: Network;
-  private nodes = [];
-  private taskQueue: TaskQueue;
-  private nodeStyle = "thumbnail";
+  network: Network;
+  nodes = [];
+  taskQueue: TaskQueue;
+  nodeStyle = "thumbnail";
 
   constructor(taskQueue: TaskQueue) {
     this.taskQueue = taskQueue;  

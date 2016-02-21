@@ -11,12 +11,12 @@ import {Animation} from './animation';
 @bindable('network')
 export class Canvas { 
 
-  private network: Network;
-  private nodes = [];
-  private taskQueue: TaskQueue;
-  private dialogService: DialogService;
-  private isDragging = false;
-  private nodeStyle = "regular";
+  network: Network;
+  nodes = [];
+  taskQueue: TaskQueue;
+  dialogService: DialogService;
+  isDragging = false;
+  nodeStyle = "regular";
 
   constructor(taskQueue: TaskQueue, dialogService: DialogService) {
     this.taskQueue = taskQueue;
