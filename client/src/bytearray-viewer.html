@@ -1,0 +1,19 @@
+<template>
+  <div class="node-regular">
+    <textarea readonly value.bind='text' class="text-area">
+    </textarea>
+    <div style="margin-left: 10px" class="buttons">
+      <div class="actions" style="display: block;">
+        <form action="">
+          <button class="button icon remove" type="submit">Clear</button>
+          <button class="button icon loop" type="reset">Resend</button>
+          <select class="button" name="encoding" value.bind='encoding'>
+            <option value="HEX">HEX</option>
+            <option value="UTF8">UTF-8</option>
+            <option value="B64">BASE-64</option>
+          </select>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>

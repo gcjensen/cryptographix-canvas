@@ -26,16 +26,15 @@ export class Canvas {
   attached() {
     // the network object has been bound to canvas in the view
     this.network.loadComponents().then(() => {
-      this.network.initialize();  
-
-      this.network.graph.nodes.forEach(node => {
-        this.nodes.push(node);
-      });
-
-      // microtask ensures the work is not done until each node has attached to the view
-      this.taskQueue.queueMicroTask({
-        call: () => this.setUpGraphUI()
-      });
+      this.network.initialize();
+    }).then(() => {
+        this.network.graph.nodes.forEach(node => {
+            this.nodes.push(node);
+        });
+        // microtask ensures the work is not done until each node has attached to the view
+        this.taskQueue.queueMicroTask({
+          call: () => this.setUpGraphUI()
+        });
     });
   }
 
@@ -54,15 +53,24 @@ export class Canvas {
     }
     this.connectNodes(this.network.graph.links); 
     this.registerEvents();
+    jsPlumb.repaintEverything();
   }
 
+  /* 
+   * clicking a node to zoom interferes with clicking the text area
+   * of ByteArrayEntry or ByteArrayViewer, so zooming functionality
+   * has been temporarily disabled by removing the click register 
+   * in the view
+   */
   zoom(node: Node) {
     // check to prevent dragging event from causing a zoom
     if (!this.isDragging) {
-      if (!this.isZoomedIn(node)) {
-        Animation.zoomIn(node, this.nodes, 3);
-      } else {
-        Animation.zoomOut(this.nodes);
+        if (!this.isZoomedIn(node)) {
+          Animation.zoomIn(node, this.nodes, 2);
+          node['zoomedIn'] = true;
+        } else {
+          node['zoomedIn'] = false;
+          Animation.zoomOut(this.nodes);
       }
     }
     this.isDragging = false;
@@ -82,53 +90,33 @@ export class Canvas {
         node.metadata.view.x = e.pos[0];    
         node.metadata.view.y = e.pos[1];
         self.isDragging = true;
-        }
+      }
     });
   }
 
   addPortsToNode(node: Node) {
-    var portsArray = this.sortPorts(node.ports);
-
-    // do everything for the inout, in and out ports respectively
-    for (let portArray of [portsArray[0], portsArray[1], portsArray[2]]) {
-      if (portArray.length > 0) {
-      
-        /* 
-         * ports are spaced out evenly on the node, depending on the number of them
-         * INOUT - top of node
-         * IN - left of node
-         * OUT - right of node
-         */
-        for (var j = 0; j < portArray.length; j++) {
-          if (portArray[0].direction === Direction.INOUT) {
-            var x = (1 / (portArray.length + 1)) + ((1 / (portArray.length + 1)) * j);            
-            var y = 0;
-          } else {
-            var x = portArray[0].direction - 1;
-            var y = (1 / (portArray.length + 1)) + ((1 / (portArray.length + 1)) * j);
-          }
-
-          jsPlumb.addEndpoint(node.id, {
-            // id's are combined so connections can be drawn from specific ports on specific nodes
-            uuid: node.id + "-" + portArray[j].id,
-            anchors: [[x, y]],
-            isSource: portArray[0].direction === Direction.OUT,
-            isTarget:portArray[0].direction === Direction.IN,           
-            maxConnections: -1, // no limit
-            paintStyle: { fillStyle: "#77aca7", radius: 4 },
-            hoverPaintStyle: { fillStyle: "#77aca7", radius: 8 },
-            connectorStyle: { strokeStyle: "#77aca7", lineWidth: 4 },
-            connectorHoverStyle: { lineWidth: 8 }
-          });
-          }
-      }
-    }
+    var self = this;
+    node.ports.forEach(function(port) {
+      var endpoint = jsPlumb.addEndpoint(node.id, {
+        // id's are combined so connections can be drawn from specific ports on specific nodes
+        uuid: node.id + ":" + port.id,
+        anchor: "Continuous",
+        isSource: port.direction === Direction.OUT,
+        isTarget: port.direction === Direction.IN,
+        maxConnections: -1, // no limit
+        paintStyle: { fillStyle: "#77aca7", radius: 4 },
+        hoverPaintStyle: { fillStyle: "#77aca7", radius: 8 },
+        connectorStyle: { strokeStyle: "#77aca7", lineWidth: 4 },
+        connectorHoverStyle: { lineWidth: 8 }
+      });
+      self.registerEndpointEvents(endpoint);
+    });
   }
 
   connectNodes(links: Map<string, Link>) {
     links.forEach(function(link) {
       (jsPlumb.connect({
-        uuids: [link.fromNode.id + "-" + link.fromPort.id, link.toNode.id + "-" + link.toPort.id],
+        uuids: [link.fromNode.id + ":" + link.fromPort.id, link.toNode.id + ":" + link.toPort.id],
         endpointStyle: { fillStyle: "#77aca7", radius: 4 },
         hoverPaintStyle: { radius: 8 },
         paintStyle: { strokeStyle: "#77aca7", lineWidth: 4 }
@@ -155,27 +143,24 @@ export class Canvas {
     });
   }
 
+  // endpoints can be moused-over to find out their id and direction
+  registerEndpointEvents(endpoint: any) {
+    var uuid = endpoint.getUuid().split(":")[1];
+    endpoint.bind("mouseover", function(endpoint) {
+      if (endpoint.isSource && endpoint.isTarget) var label = uuid + " - INOUT";
+      else if (endpoint.isSource) var label = uuid + " - OUT";
+      else var label = uuid + " - IN";
+      endpoint.addOverlay(["Label", { label: label, location: [-0.5, -0.5], id: "id" }]);
+    });
+    endpoint.bind("mouseout", function(endpoint) {
+      endpoint.removeOverlay("id");
+    });
+  }
+
   unregisterEvents() {
     jsPlumb.unbind("connection");
     jsPlumb.unbind("connectionDetached");
     jsPlumb.unbind("connectionMoved");
-  }
-
-  sortPorts(ports: any) {
-    var inOutPorts = [];
-    var inPorts = [];
-    var outPorts = [];
-
-    ports.forEach(function(port) {
-      if (port.direction === Direction.INOUT) {
-        inOutPorts.push(port);
-      } else if (port.direction === Direction.IN) {
-        inPorts.push(port);
-      } else {
-        outPorts.push(port);
-      }
-    });
-    return [inOutPorts, inPorts, outPorts];
   }
 
   removeGraph(graph: any) {
@@ -185,25 +170,46 @@ export class Canvas {
   }
 
   addNode() {
-   this.dialogService.open({ viewModel: AddNodeDialog }).then(response => {
-     // need to obtain components to populate dialog
-   });
+    this.network.teardown();
+    this.dialogService.open({ viewModel: AddNodeDialog }).then(response => {
+      if (!response.wasCancelled) {
+        var node = response.output;
+        // the node is placed in an arbitrary position
+        node.metadata.view.x = "300px";
+        node.metadata.view.y = "300px";
+        this.network.graph.addNode(node.id, node.toObject()); 
+        this.nodes.push(this.network.graph.getNodeByID(node.id));
+        this.taskQueue.queueMicroTask({
+          call: () => this.configureNewNode(node)
+        });
+        this.network.loadComponents().then(() => {
+          this.network.initialize();
+        });
+      }
+    });
   }
 
+  configureNewNode(node: Node) {
+    this.configureDomElement(node);
+    this.addPortsToNode(node);
+    jsPlumb.repaintEverything();
+  }
 
   createLink(sourceEndPointID: any, targetEndPointID: any, linkID: string) {
     
+    this.network.teardown();
     if (!linkID) {     
       this.dialogService.open({ viewModel: LinkConfigDialog }).then(response => {
         if (!response.wasCancelled) {
           // rename the jsPlumb connection instance to the user chosen name
           jsPlumb.getConnections()[jsPlumb.getConnections().length - 1].id = response.output;
          
-          // endpoint UUIDs contain information about the node they're on, so we must split this out  
+          // endpoint UUIDs contain information about the node they're on, so we must split this out 
           this.network.graph.addLink(response.output, {
-            from: { nodeID: sourceEndPointID.split("-")[0], portID: sourceEndPointID.split("-")[1] },
-            to: { nodeID: targetEndPointID.split("-")[0], portID: targetEndPointID.split("-")[1] }
+            from: { nodeID: sourceEndPointID.split(":")[0], portID: sourceEndPointID.split(":")[1] },
+            to: { nodeID: targetEndPointID.split(":")[0], portID: targetEndPointID.split(":")[1] }
           });
+          this.network.loadComponents().then(() => { this.network.initialize(); });
         } else {
           // if no ID is provided, remove the connection
           var connections = jsPlumb.getConnections()
@@ -213,24 +219,29 @@ export class Canvas {
     } else {
       // endpoint UUIDs contain information about the node they're on, so we must split this out  
       this.network.graph.addLink(linkID, {
-        from: { nodeID: sourceEndPointID.split("-")[0], portID: sourceEndPointID.split("-")[1] },
-        to: { nodeID: targetEndPointID.split("-")[0], portID: targetEndPointID.split("-")[1] }
+        from: { nodeID: sourceEndPointID.split(":")[0], portID: sourceEndPointID.split(":")[1] },
+        to: { nodeID: targetEndPointID.split(":")[0], portID: targetEndPointID.split(":")[1] }
       });
+      this.network.loadComponents().then(() => { this.network.initialize(); });
     }
     // repeated code is necessary, otherwise the link would be added before it gets the ID supplied by the user
   }
 
   removeLink(linkID: string) {  
+    this.network.teardown();
     this.network.graph.removeLink(linkID);
+    this.network.loadComponents().then(() => {
+      this.network.initialize();
+    });
   }
 
-  changeLink(data: any) { 
+  changeLink(data: any) {
     this.removeLink(data.connection.id);
     this.createLink(data.originalSourceEndpoint.getUuid(), data.newTargetEndpoint.getUuid(), data.connection.id);
   }
 
   isNewConnection(linkID: any) {
-    var isNew: Boolean;
+    var isNew = true;
     this.network.graph.links.forEach(link => {  
       isNew = link.toObject()["id"] !== linkID; 
     });

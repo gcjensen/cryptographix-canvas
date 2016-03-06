@@ -4,6 +4,8 @@ export class Animation {
   
   static zoomIn(nodeToZoom: Node, nodes: Node[], zoomLevel: number) {
 
+    //document.getElementById("pay").style.transform = "scale(2)";
+
     jsPlumb.setDraggable(nodeToZoom.id, false);
     var nodeElement = document.getElementById(nodeToZoom.id);
     nodeElement.style.width = (parseInt(nodeElement.style.width) * zoomLevel) + "px";
@@ -29,11 +31,7 @@ export class Animation {
         "width": nodeElement.style.width 
       },{ 
         duration: "400" 
-      },{ 
-        step: function() {         
-          jsPlumb.repaintEverything();
-        }
-    });
+      },{});
 
     var otherNodes = nodes.filter(function(node) {
         return node.id !== nodeToZoom.id;
@@ -58,13 +56,9 @@ export class Animation {
           "top": newY, 
           "height": nodeElement.style.height, 
           "width": nodeElement.style.width 
-        },{ duration: "400" },{ 
-          step: function() {         
-            jsPlumb.repaintEverything();
-          }
-      });
+        },{ duration: "400" },{});
     }
-  }
+   }
 
   static zoomOut(nodes: Node[]) {
 
@@ -72,17 +66,17 @@ export class Animation {
     for (var node of nodes) {
       jsPlumb.setDraggable(node.id, true);
       var nodeElement = document.getElementById(node.id);
-      nodeElement.style.width = "100px";
-      nodeElement.style.height = "100px";
+      nodeElement.style.width = parseInt(node.metadata.view.width) + "px";
+      nodeElement.style.height = parseInt(node.metadata.view.height) + "px";
       nodeElement.style.borderRadius = "20px";
       this.setFonts("component-name", 1);    
 
       jsPlumb.animate(node.id, { 
         "left": parseInt(node.metadata.view.x), 
         "top": parseInt(node.metadata.view.y), 
-        "height": "100px", 
-        "width": "400px"
-       }, { duration: "400" }, { 
+        "height": parseInt(node.metadata.view.height) + "px", 
+        "width": parseInt(node.metadata.view.width) + "px"
+      }, { duration: "400" }, { 
         step:function() {         
           jsPlumb.repaintEverything();
         }

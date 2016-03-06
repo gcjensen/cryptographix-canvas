@@ -1,4 +1,4 @@
-import {autoinject, customElement, bindable, containerless} from 'aurelia-framework';
+import {autoinject, customElement, bindable} from 'aurelia-framework';
 import {Node} from 'cryptographix-sim-core';
 
 @autoinject

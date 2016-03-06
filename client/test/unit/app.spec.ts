@@ -33,7 +33,7 @@ describe('the App module', () => {
     expect(sut.router.routes).toContain({ route: ['','home'], name: 'home',  moduleId: 'home', nav: true, title:'Home', settings:'home' });
   });
 
-  it('should have a builder route', () => {
-     expect(sut.router.routes).toContain({ route: 'builder', name: 'builder', moduleId: 'builder', nav: true, title:'Builder', settings:'wrench' });
+  it('should have a my networks route', () => {
+    expect(sut.router.routes).toContain({ route: ['my-networks'], name: 'my-networks', moduleId: 'my-networks', nav: true, title: 'My Networks', settings: 'share-alt' });
   });
 });

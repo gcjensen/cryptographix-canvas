@@ -1,5 +1,4 @@
 import {autoinject, customElement, bindable, TaskQueue} from 'aurelia-framework';
-
 import {Network, Node} from 'cryptographix-sim-core';
 
 @autoinject
@@ -30,6 +29,8 @@ export class NetworkThumbnail {
         call: () => this.configureDomElements()
       });
     });
+
+    this.addAnimationListeners();
   }
 
   configureDomElements() {
@@ -38,6 +39,19 @@ export class NetworkThumbnail {
       nodeElement.style.width = "50px";
       nodeElement.style.height = "50px";
     }
+  }
+
+  addAnimationListeners() {
+    // the casts to any are to remove TypeScript warnings about unknown methods
+    ($(".network-thumbnail") as any).mouseenter(function(){
+        ($(this) as any).addClass("hover");
+    })
+    .mouseleave(function(){
+        ($(this) as any).removeClass("hover");
+    })
+    .mousedown(function(){
+        ($(this) as any).removeClass("hover");
+    });
   }
 
 }

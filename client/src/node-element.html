@@ -1,5 +1,13 @@
 <template>
-  <div id="${node.id}" class="node-${style}">
-    <p class="component-name">${node.toObject().component}</p>
+
+  <div if.bind="style === 'thumbnail'" id="${node.id}" class="node-thumbnail">
+    <p class="component-name"><i class="fa fa-${node.context.instance.icon}"></i></p>
   </div>
+
+  <div if.bind="style === 'palette'" id="${node.id}" class="node-palette">
+    <p class="component-name"><i class="fa fa-${node.metadata.icon}"></i></p>
+  </div>
+
+  <compose if.bind="style === 'regular'" style="position: absolute;" model.bind="node.context.instance" id="${node.id}" view-model="${node.metadata.vm}"></compose>
+
 </template>

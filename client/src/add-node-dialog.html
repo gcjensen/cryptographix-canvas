@@ -1,13 +1,18 @@
 <template>
-  <ai-dialog style="width:30%">
-    <ai-dialog-body>
+  <require from="node-element"></require>
+  <ai-dialog class="dialog">
+    <ai-dialog-body class="dialog-body">
       <h2>Add Node</h2>
-      Available components will be shown here...
+      <div>
+        <node-element click.trigger="nodeSelected(node)" repeat.for="node of nodes" node.bind="node" style.bind="nodeStyle"></node-element>
+      </div>
+      <div class="id-input">
+        NodeID:<input id="id-input" value.bind="nodeID" type="text" class="form-control" aria-describedby="basic-addon1">
+      </div>
     </ai-dialog-body>
-
-    <ai-dialog-footer>
+    <ai-dialog-footer class="dialog-footer">
       <button click.trigger="controller.cancel()">Cancel</button>
-      <button click.trigger="controller.ok()">Ok</button>
+      <button id="addButton" disabled="true" click.trigger="controller.ok(selectedNode)">Add ${componentName} to network</button>
     </ai-dialog-footer>
   </ai-dialog>
 </template>

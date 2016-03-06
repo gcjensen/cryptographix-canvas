@@ -2,11 +2,14 @@ import {autoinject} from 'aurelia-framework';
 import {HttpClient, json} from 'aurelia-fetch-client';
 import 'fetch';
 import {Network, Graph, Direction, ComponentFactory, Kind, Node} from 'cryptographix-sim-core';
+import { ByteArrayEntry } from './bytearray-entry';
+import { ByteArrayViewer } from './bytearray-viewer';
+import { CryptoBox } from './crypto-box';
+
 
 @autoinject
 export class MyNetworks {
-
-  heading: string;
+ 
   network: Network;
   networks = [];
   components: {};
@@ -19,13 +22,6 @@ export class MyNetworks {
         .useStandardConfiguration()
         .withBaseUrl('http://localhost:8080/api/');
     });
-
-    this.components = {
-      "A": A,
-      "B": B,
-      "C": C,
-      "D": D
-    }
     
     this.http = http;
     this.fetchNetworks();
@@ -33,17 +29,16 @@ export class MyNetworks {
   }
 
   fetchNetworks() {
-    this.http.fetch('getNetworks', {
+    return this.http.fetch('getNetworks', {
         method: 'get'
     }).then(response => response.json())
       .then(data => {
-        // if there are no saved networks, add a couple of example ones
+        // if there are no saved networks, add an example one
         if (data.length === 0) {
-            this.saveNewGraph(exampleGraph1);
-            this.saveNewGraph(exampleGraph2);
+          this.saveNewGraph(exampleGraph);
         } else {
-            for (var network of data)
-              this.configureNetwork(network);
+          for (var network of data)
+            this.configureNetwork(network);
         }
       }); 
   }
@@ -51,7 +46,10 @@ export class MyNetworks {
   configureNetwork(network: any) {
     let graph = new Graph(null, network.graph);
     let factory = new ComponentFactory();
-    graph.nodes.forEach(node => { this.configureNode(node, factory, network.graph) });
+    factory.register( 'ByteArrayEntry', ByteArrayEntry );
+    factory.register( 'ByteArrayViewer', ByteArrayViewer );
+    factory.register( 'CryptoBox', CryptoBox );
+    graph.nodes.forEach(node => { this.configureNode(node, network.graph) });
     this.networks.push(new Network(factory, graph));
   }
 
@@ -83,15 +81,11 @@ export class MyNetworks {
       body: json(graph)
     }).then(response => response.json())
       .then(data => {
-        console.log(data);
-        // ensure the example graphs don't get duplicated
-        if (graph["id"] === "Example Graph 2")
-          this.fetchNetworks();
+        this.fetchNetworks();  
     });
   }
           
-  configureNode(node: Node, factory: ComponentFactory, graph: any) {
-    factory.register((node.toObject() as any).component, this.components[(node.toObject() as any).component]);
+  configureNode(node: Node, graph: any) {
     node.metadata["view"] = {
       x: graph.nodes[node.id].metadata.view.x,
       y: graph.nodes[node.id].metadata.view.y,
@@ -107,92 +101,49 @@ export class MyNetworks {
 
 }	
 
-class A {}
-class B {}
-class C {}
-class D {}
-
-
-var exampleGraph1 = {
-  "id": "Example Graph 1",
-  "nodes": {
-    "node1": {
-      "component": "A",
-      "metadata": { "view": { "x": "100px", "y": "200px", "width": "100px", "height": "100px" } },
-      "ports": {
-        "portOut1": { "direction": "out" },
-        "portOut2": { "direction": "out" },
-        "portIn1": { "direction": "in" }
-      }
-    },
-    "node2": {
-      "component": "B",
-      "metadata": { "view": { "x": "450px", "y": "400px", "width": "100px", "height": "100px" } },
-      "ports": {
-        "portOut1": { "direction": "out" },
-        "portIn1": { "direction": "in" }
-      }
-    },
-    "node3": {
-      "component": "C",
-      "metadata": { "view": { "x": "820px", "y": "150px", "width": "100px", "height": "100px" } },
-      "ports": {
-        "portOut1": { "direction": "out" },
-        "portIn1": { "direction": "in" }
-      }
-    },
-    "node4": {
-      "component": "D",
-      "metadata": { "view": { "x": "1100px", "y": "300px", "width": "100px", "height": "100px" } },
-      "ports": {
-        "portOut1": { "direction": "out" },
-        "portIn1": { "direction": "in" }
-      }
-    } 
-  },  
-  "links": {
-    "link1": {
-      "from": { "nodeID": "node1", "portID": "portOut1" },
-      "to": { "nodeID": "node2", "portID": "portIn1" }
-    },
-    "link2": {
-      "from": { "nodeID": "node2", "portID": "portOut1" },
-      "to": { "nodeID": "node3", "portID": "portIn1" }
-    },
-    "link3": {        
-      "from": { "nodeID": "node3", "portID": "portOut1" },
-      "to": { "nodeID": "node4", "portID": "portIn1" }
-    }
-  }
-}
-
-
-var exampleGraph2 = {
+var exampleGraph = {
   "id": "Example Graph 2",
   "nodes": {
-    "node1": {
-      "component": "A",
-      "metadata": { "view": { "x": "100px", "y": "200px", "width": "100px", "height": "100px" } },
+    "bytearray-entry": {
+      "component": "ByteArrayEntry",
+      "metadata": { 
+        "view": { "x": "100px", "y": "100px", "width": "200px", "height": "200px" },
+        "vm": "bytearray-entry" 
+      },
       "ports": {
-        "portOut1": { "direction": "out" },
-        "portOut2": { "direction": "out" },
-        "portIn1": { "direction": "in" }
+        'out': { "direction": "OUT" },
       }
     },
-    "node3": {
-      "component": "C",
-      "metadata": { "view": { "x": "820px", "y": "150px", "width": "100px", "height": "100px" } },
+    "crypto-box": {
+      "component": "CryptoBox",
+      "metadata": { 
+        "view": { "x": "500px", "y": "100px", "width": "100px", "height": "100px" },
+        "vm": "crypto-box"
+      },
       "ports": {
-        "portOut1": { "direction": "out" },
-        "portIn1": { "direction": "in" }
+          'plaintext': { "direction": "IN" },
+          'ciphertext': { "direction": "OUT" },
+          'key': { "direction": "IN" },
       }
-    } 
-  },  
+    },
+    "bytearray-viewer": {
+      "component": "ByteArrayViewer",
+      "metadata": { 
+        "view": { "x": "900px", "y": "100px", "width": "200px", "height": "200px" },
+        "vm": "bytearray-viewer"
+      },
+      "ports": {
+          'in': { "direction": "IN" },
+      }
+    }  
+  },                           
   "links": {
-    "link1": {
-      "from": { "nodeID": "node1", "portID": "portOut2" },
-      "to": { "nodeID": "node3", "portID": "portIn1" }
-    }
+    "link1": { "from": { "nodeID": "bytearray-entry", "portID": 'out' },
+            "to": { "nodeID": "crypto-box", "portID": 'plaintext' },
+          },
+    "link2": { "from": { "nodeID": "crypto-box", "portID": 'ciphertext' },
+            "to": { "nodeID": "bytearray-viewer", "portID": 'in' },
+          }
   }
 }
 
