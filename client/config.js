@@ -30,7 +30,7 @@ System.config({
     "babel-runtime": "npm:babel-runtime@5.8.35",
     "bootstrap": "github:twbs/bootstrap@3.3.6",
     "core-js": "npm:core-js@2.1.3",
-    "cryptographix-sim-core": "npm:cryptographix-sim-core@0.1.5",
+    "cryptographix-sim-core": "npm:cryptographix-sim-core@0.1.6",
     "fetch": "github:github/fetch@0.10.1",
     "font-awesome": "npm:font-awesome@4.5.0",
     "jquery.panzoom": "npm:jquery.panzoom@2.0.6",
@@ -191,7 +191,7 @@ System.config({
       "process": "github:jspm/nodelibs-process@0.1.2",
       "systemjs-json": "github:systemjs/plugin-json@0.1.0"
     },
-    "npm:cryptographix-sim-core@0.1.5": {
+    "npm:cryptographix-sim-core@0.1.6": {
       "aurelia-dependency-injection": "npm:aurelia-dependency-injection@1.0.0-beta.1.1.5",
       "aurelia-event-aggregator": "npm:aurelia-event-aggregator@1.0.0-beta.1.1.1",
       "jasmine-core": "npm:jasmine-core@2.4.1",

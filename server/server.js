@@ -32,7 +32,6 @@ routes.post('/addNetwork', function(req, res) {
   newNetwork.markModified('graph');
   newNetwork.save(function(err) {
     if (err) {
-      console.log(err);
       return res.json({success: false, msg: 'Error.'});
     }
     res.json({success: true, msg: 'Successful saved network.'});

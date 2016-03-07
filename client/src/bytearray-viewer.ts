@@ -1,68 +1,68 @@
 import { customElement, autoinject, bindable, inlineView, child } from 'aurelia-framework';
 import { ByteArray, Component, Kind, EndPoint, Direction, Message, Channel } from 'cryptographix-sim-core';
 
-@customElement( 'bytearray-viewer' )
+@customElement('bytearray-viewer')
 @autoinject()
-@bindable('component')
 export class ByteArrayViewerVM {
 
-  component: ByteArrayViewer;
   @bindable text: string = '';
   @bindable encoding: string = 'HEX';
 
-  activate(component) {
-    this.component = component;
-    if (this.component)
-      this.component.bindView(this);
+  private _component: Component;
+  activate( component: ByteArrayViewer ) {
+    this._component = component;
+
+    if ( component ) {
+      component.bindView( this );
+    }
   }
 
-  componentChanged( newValue: ByteArrayViewer ) {
-    let me = this;
-    if (newValue)
-      newValue.onDataIn((din: ByteArray) => {
-        me.text = din.toString(ByteArray.HEX);
-      });
+  private _bytes: ByteArray;
+  setBytes( bytes: ByteArray ) {
+    this._bytes = bytes;
+
+    this.text = bytes.toString( ByteArray.stringToEncoding( this.encoding ) );
+  }
+
+  encodingChanged( newValue: string ) {
+    // refresh
+    this.setBytes( this._bytes );
   }
 }
 
 export class ByteArrayViewer implements Component {
 
   private _dataIn: EndPoint;
-  cb: any;
-  view: any;
+
+  view: ByteArrayViewerVM;
   icon: string = "eye";
 
-  bindView(view: any) {
+  bindView( view: ByteArrayViewerVM ) {
     this.view = view;
   }
 
-  initialize(config: Kind): EndPoint[] {
-    let me = this;
-
-    // init EndPoints
+  initialize( config: Kind): EndPoint[] {
+    // it EndPoits
     this._dataIn = new EndPoint( 'in', Direction.IN );
-    this._dataIn.onMessage( (msg: Message<ByteArray> ) => {
-      console.log( 'ByteArrayOutput: got data -> ' + msg.payload.toString( ByteArray.HEX ) );
-      this.view.text = msg.payload.toString(ByteArray.HEX);
 
-      if ( me.cb )
-        me.cb( msg.payload );
+    this._dataIn.onMessage( (msg: Message<ByteArray> ) => {
+      console.log( 'ByteArayOutput: got data -> ' + msg.payload.toString( ByteArray.HEX ) );
+
+      // update view ..
+       if ( this.view )
+          this.view.setBytes( msg.payload );
     });
 
     // and return collection
     return [ this._dataIn ];
   }
 
-  teardown() {
+  teardown( ) {
     this._dataIn = null;
   }
-
+ 
   start() {}
-  stop() {}
+  stop() {}  
   pause() {}
   resume() {}
-
-  onDataIn( cb ) {
-    this.cb = cb;
-  }
 }
