@@ -17,6 +17,7 @@ export class Canvas {
   dialogService: DialogService;
   isDragging = false;
   nodeStyle = "regular";
+  newConnectionSource: string;
 
   constructor(taskQueue: TaskQueue, dialogService: DialogService) {
     this.taskQueue = taskQueue;
@@ -101,8 +102,8 @@ export class Canvas {
         // id's are combined so connections can be drawn from specific ports on specific nodes
         uuid: node.id + ":" + port.id,
         anchor: "Continuous",
-        isSource: port.direction === Direction.OUT,
-        isTarget: port.direction === Direction.IN,
+        isSource: true,
+        isTarget: true,
         maxConnections: -1, // no limit
         paintStyle: { fillStyle: "#77aca7", radius: 4 },
         hoverPaintStyle: { fillStyle: "#77aca7", radius: 8 },
@@ -141,15 +142,45 @@ export class Canvas {
     jsPlumb.bind("connectionMoved", function(data) {
       self.changeLink(data);
     });
+
+    // delete links on double click
+    jsPlumb.bind("dblclick", function(conn) {
+        jsPlumb.detach(conn);
+    });
+
+    /* 
+     * beforeDrop doesn't provide information about the source endpoint, therefore
+     * beforeStartDetach (when the link is being dragged from a port that already has another link) 
+     * and beforeDrag (when the source port does not have another link) are needed so that
+     * the source endpoint can be known about
+     */
+    jsPlumb.bind("beforeStartDetach", function(params) {
+      self.newConnectionSource = params.endpoint.getUuid();
+      return true;
+    });
+
+    jsPlumb.bind("beforeDrag", function(params) {
+      self.newConnectionSource = params.endpoint.getUuid();
+      return true;
+    });
+
+    // used newConnectionSource and the dropEndpoint to determine whether the link can be made
+    jsPlumb.bind("beforeDrop", function(params) { 
+      return self.arePortsCompatible(self.newConnectionSource, params.dropEndpoint.getUuid());         
+    });
   }
 
   // endpoints can be moused-over to find out their id and direction
   registerEndpointEvents(endpoint: any) {
-    var uuid = endpoint.getUuid().split(":")[1];
+    var id = endpoint.getUuid().split(":")[1];
+    var label: string;
+    var self = this;
+    this.network.graph.nodes.forEach(function(node) {
+      var port = node.getPortByID(id);
+      if (port !== undefined) 
+        label = id + " - " + self.getDirectionName(Direction, port.direction);
+    })
     endpoint.bind("mouseover", function(endpoint) {
-      if (endpoint.isSource && endpoint.isTarget) var label = uuid + " - INOUT";
-      else if (endpoint.isSource) var label = uuid + " - OUT";
-      else var label = uuid + " - IN";
       endpoint.addOverlay(["Label", { label: label, location: [-0.5, -0.5], id: "id" }]);
     });
     endpoint.bind("mouseout", function(endpoint) {
@@ -195,16 +226,14 @@ export class Canvas {
     jsPlumb.repaintEverything();
   }
 
-  createLink(sourceEndPointID: any, targetEndPointID: any, linkID: string) {
-    
-    this.network.teardown();
-    if (!linkID) {     
+  createLink(sourceEndPointID: any, targetEndPointID: any, linkID: string) {  
+    if (!linkID) {
       this.dialogService.open({ viewModel: LinkConfigDialog }).then(response => {
         if (!response.wasCancelled) {
           // rename the jsPlumb connection instance to the user chosen name
-          jsPlumb.getConnections()[jsPlumb.getConnections().length - 1].id = response.output;
-         
-          // endpoint UUIDs contain information about the node they're on, so we must split this out 
+          jsPlumb.getConnections()[jsPlumb.getConnections().length - 1].id = response.output;          
+          this.network.teardown();
+          // endpoint UUIDs contain information about the node they're on, so we must split this ou 
           this.network.graph.addLink(response.output, {
             from: { nodeID: sourceEndPointID.split(":")[0], portID: sourceEndPointID.split(":")[1] },
             to: { nodeID: targetEndPointID.split(":")[0], portID: targetEndPointID.split(":")[1] }
@@ -212,8 +241,8 @@ export class Canvas {
           this.network.loadComponents().then(() => { this.network.initialize(); });
         } else {
           // if no ID is provided, remove the connection
-          var connections = jsPlumb.getConnections()
-          jsPlumb.detach(connections[connections.length - 1])
+          var connections = jsPlumb.getConnections();
+          jsPlumb.detach(connections[connections.length - 1]);        
         }
       });
     } else {
@@ -240,12 +269,37 @@ export class Canvas {
     this.createLink(data.originalSourceEndpoint.getUuid(), data.newTargetEndpoint.getUuid(), data.connection.id);
   }
 
+  arePortsCompatible(sourceID, targetID) {
+    var sourceNode = this.network.graph.getNodeByID(sourceID.split(":")[0]);
+    var sourcePort = sourceNode.getPortByID(sourceID.split(":")[1]));
+    var targetNode = this.network.graph.getNodeByID(targetID.split(":")[0]);
+    var targetPort = targetNode.getPortByID(targetID.split(":")[1]));
+
+    if ((sourcePort.direction === Direction.OUT && targetPort.direction === Direction.IN) ||
+        (sourcePort.direction === Direction.IN && targetPort.direction === Direction.OUT) ||
+        (sourcePort.direction === Direction.INOUT || targetPort.direction === Direction.INOUT))
+      return true;
+    else
+      return false;
+  }
+
   isNewConnection(linkID: any) {
     var isNew = true;
     this.network.graph.links.forEach(link => {  
       isNew = link.toObject()["id"] !== linkID; 
     });
     return isNew;
+  }
+
+  getDirectionName(directions, desiredDirection) {
+    for (var direction in directions) {
+      if (directions.hasOwnProperty(direction)) {
+        if(directions[direction] == desiredDirection) {
+          return direction;
+        }
+      }
+    }
+    return undefined;
   }
 
   isZoomedIn(node: Node) {
