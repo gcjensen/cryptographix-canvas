@@ -149,8 +149,12 @@ body {
   top: 15px;
 }
 
-.btn-add {
+.btn-play {
   top: 80px;
+}
+
+.btn-add {
+  top: 145px;
 }
 
 .btn-circle.btn-lg:hover {

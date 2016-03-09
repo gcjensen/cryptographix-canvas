@@ -29,7 +29,7 @@ export class ByteArrayEntryVM {
   }
 
   textChanged(newValue) {
-    this._component.setText(newValue);
+    //this._component.setText(newValue);
   }
 }
 
@@ -64,7 +64,10 @@ export class ByteArrayEntry implements Component {
     this._dataOut = null;
   }
 
-  start() { }
+  start() {
+    this.setText(this.view.text);
+  }
+
   stop() { }
   pause() { }
   resume() { }

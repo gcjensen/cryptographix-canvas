@@ -208,6 +208,10 @@ export class Canvas {
     });
   }
 
+  runNetwork() {
+    this.network.start();
+  }
+
   addNode() {
     this.dialogService.open({ viewModel: AddNodeDialog }).then(response => {
       if (!response.wasCancelled) {
@@ -229,7 +233,7 @@ export class Canvas {
   }
 
   /* 
-   * as far as I can tell an issue with Aurelia's repeat.for means 
+   * as far as I can tell, an issue with Aurelia's repeat.for means 
    * I can't splice out of the 'nodes' array, so I have to destroy 
    * everything and then rebuild without the deleted node
    */
