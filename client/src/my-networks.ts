@@ -107,7 +107,7 @@ var exampleGraph = {
     "bytearray-entry": {
       "component": "ByteArrayEntry",
       "metadata": { 
-        "view": { "x": "100px", "y": "100px", "width": "200px", "height": "200px" },
+        "view": { "x": "100px", "y": "100px", "width": "200px", "height": "170px" },
         "vm": "bytearray-entry" 
       },
       "ports": {
@@ -117,7 +117,7 @@ var exampleGraph = {
     "crypto-box": {
       "component": "CryptoBox",
       "metadata": { 
-        "view": { "x": "500px", "y": "100px", "width": "100px", "height": "100px" },
+        "view": { "x": "500px", "y": "100px", "width": "190px", "height": "160px" },
         "vm": "crypto-box"
       },
       "ports": {
@@ -129,7 +129,7 @@ var exampleGraph = {
     "bytearray-viewer": {
       "component": "ByteArrayViewer",
       "metadata": { 
-        "view": { "x": "900px", "y": "100px", "width": "200px", "height": "200px" },
+        "view": { "x": "900px", "y": "100px", "width": "200px", "height": "170px" },
         "vm": "bytearray-viewer"
       },
       "ports": {

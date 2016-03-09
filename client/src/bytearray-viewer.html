@@ -5,13 +5,19 @@
     <div style="margin-left: 10px" class="buttons">
       <div class="actions" style="display: block;">
         <form action="">
-          <button class="button icon remove" type="submit">Clear</button>
-          <button class="button icon loop" type="reset">Resend</button>
-          <select class="button" name="encoding" value.bind='encoding'>
-            <option value="HEX">HEX</option>
-            <option value="UTF8">UTF-8</option>
-            <option value="B64">BASE-64</option>
-          </select>
+          <!-- <button class="button icon remove" type="submit">Clear</button>
+          <button class="button icon loop" type="reset">Resend</button> -->
+          <div class="dropdown" style="display: inline-block; position: absolute; bottom: 10px">
+            <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+              ${encoding}
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+              <li><a click.trigger="encodingChanged('HEX')">HEX</a></li>
+              <li><a click.trigger="encodingChanged('UTF8')">UTF-8</a></li>
+              <li><a click.trigger="encodingChanged('B6F')">BASE-64</a></li>
+            </ul>
+          </div>
         </form>
       </div>
     </div>

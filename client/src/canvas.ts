@@ -201,14 +201,14 @@ export class Canvas {
   }
 
   addNode() {
-    this.network.teardown();
     this.dialogService.open({ viewModel: AddNodeDialog }).then(response => {
       if (!response.wasCancelled) {
         var node = response.output;
         // the node is placed in an arbitrary position
         node.metadata.view.x = "300px";
         node.metadata.view.y = "300px";
-        this.network.graph.addNode(node.id, node.toObject()); 
+        this.network.teardown();
+        this.network.graph.addNode(node.id, node.toObject()) 
         this.nodes.push(this.network.graph.getNodeByID(node.id));
         this.taskQueue.queueMicroTask({
           call: () => this.configureNewNode(node)

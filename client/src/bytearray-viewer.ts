@@ -25,6 +25,7 @@ export class ByteArrayViewerVM {
   }
 
   encodingChanged( newValue: string ) {
+    this.encoding = newValue;
     // refresh
     this.setBytes( this._bytes );
   }

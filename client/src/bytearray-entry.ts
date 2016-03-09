@@ -24,6 +24,7 @@ export class ByteArrayEntryVM {
   }
 
   encodingChanged(newValue: string) {
+    this.encoding = newValue;
     this._component.setEncoding(ByteArray.stringToEncoding(newValue));
   }
 

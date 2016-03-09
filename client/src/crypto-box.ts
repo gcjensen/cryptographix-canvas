@@ -2,7 +2,7 @@ import { customElement, autoinject, bindable, inlineView, child } from 'aurelia-
 import { ByteArray, Component, Kind, EndPoint, Direction, Message, Channel } from 'cryptographix-sim-core';
 import { CryptographicServiceProvider } from 'cryptographix-sim-core';
 
-@customElement( 'crypto-box' )
+@customElement('crypto-box')
 @autoinject()
 @bindable('component')
 export class CryptoBoxVM {
@@ -12,8 +12,56 @@ export class CryptoBoxVM {
   activate(component) {
     this._component = component;
 
-    if ( component )
-      component.bindView( this );
+    if (component)
+      component.bindView(this);
+
+    this.algorithm = 'DES-ECB';
+    this.op = 'encrypt';
+  }
+
+  @bindable
+  sizeIV: number = 0;
+  @bindable
+  iv: string = "0000000000000000";
+
+  @bindable
+  algorithm: string;
+
+  @bindable
+  op: string;
+
+
+  opChanged(op){  
+    this.op = op;
+    this.algorithmChanged(this.algorithm);
+  }
+
+  ivChanged(newValue) {
+    this.algorithmChanged(this.algorithm);
+  }
+
+  algorithmChanged(algorithm: string) {
+    this.algorithm = algorithm;
+    let iv;
+
+    if ( this.algorithm == 'DES-ECB' ) {
+
+      this.sizeIV = 0;
+    }
+    else if( this.algorithm == 'DES-CBC' ) {
+
+      iv = new ByteArray( this.iv, ByteArray.HEX );
+      this.sizeIV = 8;
+      if (iv.length !== this.sizeIV) {
+        var ivInput = document.getElementById("iv-input");
+        ivInput.classList.add("has-error");
+      } else {
+        var ivInput = document.getElementById("iv-input");
+        ivInput.classList.remove("has-error");
+      }
+    }
+
+    this._component.setAlgorithm( this.op, this.algorithm, iv );
   }
 }
 
@@ -24,14 +72,8 @@ export class CryptoBox implements Component {
 
   constructor() {
     this._cryptoProvider = new CryptographicServiceProvider();
-    let me = this;
 
-    // import default key
-    this._cryptoProvider
-      .importKey( 'raw',
-        new ByteArray( [ 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 ] ),
-        "DES-ECB", true, [ 'encrypt' ] )
-      .then( key => { me._key = key; } );
+    this.setAlgorithm( 'encrypt', 'DES-ECB', null );
   }
 
   private _dataIn: EndPoint;
@@ -47,18 +89,70 @@ export class CryptoBox implements Component {
     this.view = view;
   }
 
+  private _op: string;
+  private _algorithm: string;
+  private _iv: ByteArray;
+
+  setAlgorithm( op: string, algo: string, iv: ByteArray ) {
+    let prevAlgo = this._algorithm;
+
+    this._op = op;
+    this._algorithm = algo;
+    this._iv = iv;
+
+    if ( prevAlgo != algo ) {
+      let me = this;
+
+      this._key = null;
+
+      // import default key
+      this._cryptoProvider
+        .importKey( 'raw',
+          new ByteArray( [ 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 ] ),
+          algo, true, [ 'encrypt' ] )
+        .then( key => {
+          me._key = key;
+
+          console.log( 'created key: ' + algo );
+        } )
+        .catch( err => {
+          alert( 'oops. importKey failed: ' + err );
+        } );
+    }
+
+    // redo enc
+    this.handleDataIn( this._data );
+  }
+
   handleDataIn(data: ByteArray) {
     let ep = this._dataOut;
 
     this._data = data;
 
     if ( this._key && this._data ) {
-      this._cryptoProvider.encrypt( 'DES-ECB', this._key, data )
-        .then( ( cipherText: ByteArray ) => {
-          let msg = new Message<ByteArray>({}, cipherText );
+      // TS need an 'extends Interface' for object literals.
+      // For now, we use a 'type-assertion' on call to encrypt, to coerce to 'Algorithm'
+      let algo = {
+        name: this._algorithm,
+        iv: this._iv
+      };
 
-          ep.sendMessage(msg);
-        });
+      if ( this._op == 'encrypt') {
+        this._cryptoProvider.encrypt( algo as Algorithm, this._key, data )
+          .then( ( cipherText: ByteArray ) => {
+            let msg = new Message<ByteArray>({}, cipherText );
+
+            ep.sendMessage(msg);
+          });
+      }
+      else {
+        this._cryptoProvider.decrypt( algo as Algorithm, this._key, data )
+          .then( ( plainText: ByteArray ) => {
+            let msg = new Message<ByteArray>({}, plainText );
+
+            ep.sendMessage(msg);
+          });
+      }
     }
   }
 

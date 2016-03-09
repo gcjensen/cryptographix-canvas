@@ -1,5 +1,43 @@
 <template>
   <div id="${node.id}" class="node-regular">
     <p class="component-name"><i class="fa fa-lock"></i></p>
+    <div style="margin-left: 10px" class="buttons">
+      <div class="actions" style="display: block;">
+        <form action="">
+          <!--button class="button icon remove" type="submit">Clear</button>
+          <button class="button icon loop" type="reset">Resend</button-->
+
+          <div id="iv-input" show.bind='sizeIV > 0' class="iv-input input-group input-group-sm">
+            <span class="input-group-addon" id="basic-addon1">IV</span>
+            <input type="text" class="form-control" value.bind="iv" aria-describedby="basic-addon1" length.bind="2 * sizeIV">
+          </div>
+
+          <div class="dropdowns">
+            <div class="dropdown" style="display: inline-block">
+              <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                ${op}
+                <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                <li><a click.trigger="opChanged('encrypt')">encrypt</a></li>
+                <li><a click.trigger="opChanged('decrypt')">decrypt</a></li>
+              </ul>
+            </div>
+
+            <div class="dropdown" style="display: inline-block">
+              <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                ${algorithm}
+                <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                <li><a click.trigger="algorithmChanged('DES-ECB')">DES-ECB</a></li>
+                <li><a click.trigger="algorithmChanged('DES-CBC')">DES-CBC</a></li>
+              </ul>
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
