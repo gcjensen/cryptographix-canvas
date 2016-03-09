@@ -134,6 +134,17 @@ body {
   color: white;
 }
 
+.trash {
+  left: 50%;
+  margin-left: -20px;
+  bottom:20px; 
+  color: white;
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  color: white;
+}
+
 .btn-print {
   top: 15px;
 }

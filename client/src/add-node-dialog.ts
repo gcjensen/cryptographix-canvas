@@ -90,7 +90,7 @@ var nodes = {
     "id": "bytearray-entry",
     "component": "ByteArrayEntry",
     "metadata": { 
-      "view": { "width": "200px", "height": "200px" },
+      "view": { "width": "200px", "height": "170px" },
       "icon": "pencil",
       "vm": "bytearray-entry"
     },
@@ -102,7 +102,7 @@ var nodes = {
     "id": "crypto-box",
     "component": "CryptoBox",
     "metadata": { 
-      "view": { "width": "100px", "height": "100px" },
+      "view": { "width": "190px", "height": "160px" },
       "icon": "lock",
       "vm": "crypto-box"
     },
@@ -116,7 +116,7 @@ var nodes = {
     "id": "bytearray-viewer",
     "component": "ByteArrayViewer",
     "metadata": { 
-      "view": { "width": "200px", "height": "200px" },
+      "view": { "width": "200px", "height": "170px" },
       "icon": "eye",
       "vm": "bytearray-viewer"
     },

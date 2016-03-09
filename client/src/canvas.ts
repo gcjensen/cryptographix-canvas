@@ -25,18 +25,7 @@ export class Canvas {
   }
 
   attached() {
-    // the network object has been bound to canvas in the view
-    this.network.loadComponents().then(() => {
-      this.network.initialize();
-    }).then(() => {
-        this.network.graph.nodes.forEach(node => {
-            this.nodes.push(node);
-        });
-        // microtask ensures the work is not done until each node has attached to the view
-        this.taskQueue.queueMicroTask({
-          call: () => this.setUpGraphUI()
-        });
-    });
+    this.initialise();
   }
 
   // jsPlumb stuff is removed before changing views
@@ -45,6 +34,21 @@ export class Canvas {
     jsPlumb.detachEveryConnection();
     this.removeGraph(this.network.graph);
     this.nodes = [];
+  }
+
+  initialise() {
+    // the network object has been bound to canvas in the view
+    this.network.loadComponents().then(() => {
+      this.network.initialize();
+    }).then(() => {
+      this.network.graph.nodes.forEach(node => {
+          this.nodes.push(node);
+      });
+      // microtask ensures the work is not done until each node has attached to the view
+      this.taskQueue.queueMicroTask({
+       call: () => this.setUpGraphUI()
+      });
+    });
   }
 
   setUpGraphUI() {
@@ -86,11 +90,15 @@ export class Canvas {
     nodeElement.style.height = parseInt(node.metadata.view.height) + "px";
 
     var self = this;
-    jsPlumb.draggable(node.id, {
+    jsPlumb.draggable([node.id], {
+      start: function(e) {
+        self.isDragging = true;
+      },
       stop: function(e) {
         node.metadata.view.x = e.pos[0];    
         node.metadata.view.y = e.pos[1];
-        self.isDragging = true;
+        self.isDragging = false;
+        self.shouldNodeBeDeleted(node);
       }
     });
   }
@@ -220,6 +228,25 @@ export class Canvas {
     });
   }
 
+  /* 
+   * as far as I can tell an issue with Aurelia's repeat.for means 
+   * I can't splice out of the 'nodes' array, so I have to destroy 
+   * everything and then rebuild without the deleted node
+   */
+  deleteNode(node: Node) {
+    this.network.teardown();
+    this.network.graph.links.forEach(link => {
+      if (link.fromNode.id === node.id || link.toNode.id === node.id) {
+        this.network.graph.removeLink((link.toObject() as any).id);
+      }
+    })
+    this.network.graph.removeNode(node.id);
+    this.unregisterEvents();
+    this.removeGraph(this.network.graph);
+    this.nodes = [];
+    this.initialise();
+  }
+
   configureNewNode(node: Node) {
     this.configureDomElement(node);
     this.addPortsToNode(node);
@@ -269,11 +296,24 @@ export class Canvas {
     this.createLink(data.originalSourceEndpoint.getUuid(), data.newTargetEndpoint.getUuid(), data.connection.id);
   }
 
+  shouldNodeBeDeleted(node: Node) {
+    var trash = document.getElementById("trash").getBoundingClientRect();
+    var nodeElement = document.getElementById(node.id).getBoundingClientRect();
+
+    var overlap = !(trash.right < nodeElement.left ||
+                    trash.left > nodeElement.right ||
+                    trash.bottom < nodeElement.top ||
+                    trash.top > nodeElement.bottom);
+    
+    if (overlap)
+      this.deleteNode(node);
+  }
+
   arePortsCompatible(sourceID, targetID) {
     var sourceNode = this.network.graph.getNodeByID(sourceID.split(":")[0]);
-    var sourcePort = sourceNode.getPortByID(sourceID.split(":")[1]));
+    var sourcePort = sourceNode.getPortByID(sourceID.split(":")[1]);
     var targetNode = this.network.graph.getNodeByID(targetID.split(":")[0]);
-    var targetPort = targetNode.getPortByID(targetID.split(":")[1]));
+    var targetPort = targetNode.getPortByID(targetID.split(":")[1]);
 
     if ((sourcePort.direction === Direction.OUT && targetPort.direction === Direction.IN) ||
         (sourcePort.direction === Direction.IN && targetPort.direction === Direction.OUT) ||
