@@ -33,6 +33,11 @@ export class MyNetworks {
     this.dialogService = dialogService
   }
 
+  attached() {
+    document.getElementById('page-title').style.marginLeft = "-280px";
+    document.getElementById('page-title').style.marginTop = "-40px";
+  }
+
   fetchNetworks() {
     return this.http.fetch('getNetworks', {
         method: 'get'
@@ -40,7 +45,7 @@ export class MyNetworks {
       .then(data => {
         // if there are no saved networks, add an example one
         if (data.length === 0) {
-          this.saveNewGraph(exampleGraph, true);
+          //this.saveNewGraph(exampleGraph, true);
         } else {
           for (var network of data)
             this.configureNetwork(network);

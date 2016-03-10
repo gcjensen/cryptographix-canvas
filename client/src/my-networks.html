@@ -37,12 +37,15 @@
       </div>
     </nav>
 
-    <!-- depending on the value of graphSelected, either thumbnails are shown for the users networks,
-         or the canvas is shown for the selected network -->
+    <!-- depending on the value of graphSelected, either thumbnails are shown for the users networks, or the canvas is shown for the selected network -->
+
+    <h2 show.bind="networks.length === 0" id="page-title" class="page-title">NO NETWORKS</h2>
 
     <canvas if.bind="graphSelected" network.bind="network"></canvas>
 
-    <network-thumbnail repeat.for="network of networks" click.trigger="loadNetwork(network)" if.bind="!graphSelected" network.bind="network" style.bind="nodeStyle"></network-thumbnail>
+    <div class="panels">
+      <network-thumbnail repeat.for="network of networks" click.trigger="loadNetwork(network)" if.bind="!graphSelected" network.bind="network" style.bind="nodeStyle"></network-thumbnail>
+    </div>
 
   </section>
 </template>
