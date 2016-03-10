@@ -2,7 +2,7 @@ import {DialogController} from 'aurelia-dialog';
 import {autoinject} from 'aurelia-framework';
 
 @autoinject
-export class GraphConfigDialog {
+export class NetworkConfigDialog {
 
   graphID: string;
   controller: DialogController;

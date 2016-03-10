@@ -58,3 +58,12 @@ routes.post('/updateNetwork', function(req, res) {
     });
   });
 });
+
+routes.delete('/deleteNetwork', function(req, res) {
+  Network.findOneAndRemove({'graph.id': req.body.id }, function(network, err) {
+    if (err) {
+      return res.json({success: false, msg: 'Error.'});
+    }
+    res.json({success: true, msg: 'Successful deleted network.'});
+  })
+});

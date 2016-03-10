@@ -44,7 +44,7 @@
     <canvas if.bind="graphSelected" network.bind="network"></canvas>
 
     <div class="panels">
-      <network-thumbnail repeat.for="network of networks" click.trigger="loadNetwork(network)" if.bind="!graphSelected" network.bind="network" style.bind="nodeStyle"></network-thumbnail>
+      <network-thumbnail repeat.for="network of networks" if.bind="!graphSelected" network.bind="network" container.bind="self"></network-thumbnail>
     </div>
 
   </section>

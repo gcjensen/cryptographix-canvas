@@ -5,10 +5,8 @@ import {Network, Graph, Direction, ComponentFactory, Kind, Node} from 'cryptogra
 import { ByteArrayEntry } from './bytearray-entry';
 import { ByteArrayViewer } from './bytearray-viewer';
 import { CryptoBox } from './crypto-box';
-import { GraphConfigDialog } from './graph-config-dialog';
+import { NetworkConfigDialog } from './network-config-dialog';
 import { DialogService } from 'aurelia-dialog';
-
-
 
 @autoinject
 export class MyNetworks {
@@ -19,6 +17,9 @@ export class MyNetworks {
   label: string;
   graphSelected: boolean;
   dialogService: DialogService;
+
+  // to be passed to the thumbnail so deleteNetwork and loadNetwork can be called
+  self = this;
  
   constructor(private http: HttpClient, dialogService: DialogService) {
     http.configure(config => {
@@ -34,6 +35,7 @@ export class MyNetworks {
   }
 
   attached() {
+    // offset according to the width and height of the text
     document.getElementById('page-title').style.marginLeft = "-280px";
     document.getElementById('page-title').style.marginTop = "-40px";
   }
@@ -43,13 +45,8 @@ export class MyNetworks {
         method: 'get'
     }).then(response => response.json())
       .then(data => {
-        // if there are no saved networks, add an example one
-        if (data.length === 0) {
-          //this.saveNewGraph(exampleGraph, true);
-        } else {
-          for (var network of data)
-            this.configureNetwork(network);
-        }
+        for (var network of data)
+          this.configureNetwork(network);
       }); 
   }
 
@@ -65,9 +62,9 @@ export class MyNetworks {
 
   loadNetwork(network: Network) {
     this.network = network;
+    // the network object is then bound to the canvas custom element in the view
     this.label = this.network.graph.id;
     this.graphSelected = true;
-    // the created network object is then bound to the canvas custom element in the view
   }
 
   back() {
@@ -91,19 +88,27 @@ export class MyNetworks {
       body: json(graph)
     }).then(response => response.json())
       .then(data => {
-        // if it's example graph, load it
-        if (isExampleGraph)
-          this.fetchNetworks(); 
+        console.log(data); 
     });
   }
 
   newNetwork() {
-    this.dialogService.open({ viewModel: GraphConfigDialog }).then(response => {
+    this.dialogService.open({ viewModel: NetworkConfigDialog }).then(response => {
       if (!response.wasCancelled) {
         let network = { graph: { "id": response.output } };
         this.configureNetwork(network);
         this.saveNewGraph(network.graph);
       }
+    });
+  }
+
+  deleteNetwork(network: Network) {
+    this.http.fetch('deleteNetwork', {
+      method: 'delete',
+      body: json(network.graph.toObject({}))
+    }).then(response => response.json())
+      .then(data => {
+        this.networks.splice(this.networks.indexOf(network), 1);
     });
   }
 
@@ -122,50 +127,4 @@ export class MyNetworks {
   }
 
 }	
-
-var exampleGraph = {
-  "id": "Example Graph 1",
-  "nodes": {
-    "bytearray-entry": {
-      "component": "ByteArrayEntry",
-      "metadata": { 
-        "view": { "x": "100px", "y": "100px", "width": "200px", "height": "170px" },
-        "vm": "bytearray-entry" 
-      },
-      "ports": {
-        'out': { "direction": "OUT" },
-      }
-    },
-    "crypto-box": {
-      "component": "CryptoBox",
-      "metadata": { 
-        "view": { "x": "500px", "y": "100px", "width": "190px", "height": "160px" },
-        "vm": "crypto-box"
-      },
-      "ports": {
-          'plaintext': { "direction": "IN" },
-          'ciphertext': { "direction": "OUT" },
-          'key': { "direction": "IN" },
-      }
-    },
-    "bytearray-viewer": {
-      "component": "ByteArrayViewer",
-      "metadata": { 
-        "view": { "x": "900px", "y": "100px", "width": "200px", "height": "170px" },
-        "vm": "bytearray-viewer"
-      },
-      "ports": {
-          'in': { "direction": "IN" },
-      }
-    }  
-  },                           
-  "links": {
-    "link1": { "from": { "nodeID": "bytearray-entry", "portID": 'out' },
-            "to": { "nodeID": "crypto-box", "portID": 'plaintext' },
-          },
-    "link2": { "from": { "nodeID": "crypto-box", "portID": 'ciphertext' },
-            "to": { "nodeID": "bytearray-viewer", "portID": 'in' },
-          }
-  }
-}
 

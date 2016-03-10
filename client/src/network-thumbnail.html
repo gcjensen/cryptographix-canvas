@@ -2,7 +2,7 @@
   <require from="node-element"></require>
   <div class="panel panel-default">
 
-    <div id="effect" class="effects clearfix">
+    <div id="effect" class="effects clearfix" click.trigger="load()">
         <div class="network-thumbnail">
           <div class="panel-body">
             <node-element repeat.for="node of nodes" node.bind="node" style.bind="nodeStyle"></node-element>
@@ -12,7 +12,10 @@
           </div>
         </div>
     </div>
-    <div class="panel-footer">${network.graph.id}</div>
+    <div class="panel-footer">
+      ${network.graph.id}
+      <i style="float: right; margin-top: 3px;" click.trigger="delete()" class="fa fa-trash-o trash-small"></i>
+    </div>
   </div>
 </template>
 

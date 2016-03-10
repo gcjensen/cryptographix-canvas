@@ -4,12 +4,14 @@ import {Network, Node} from 'cryptographix-sim-core';
 @autoinject
 @customElement('network-thumbnail')
 @bindable('network')
+@bindable('container')
 export class NetworkThumbnail {
   
   network: Network;
   nodes = [];
   taskQueue: TaskQueue;
   nodeStyle = "thumbnail";
+  container: any;
 
   constructor(taskQueue: TaskQueue) {
     this.taskQueue = taskQueue;  
@@ -33,6 +35,14 @@ export class NetworkThumbnail {
     this.addAnimationListeners();
   }
 
+  delete() {
+    this.container.deleteNetwork(this.network);
+  }
+
+  load() {
+    this.container.loadNetwork(this.network);
+  }
+
   configureDomElements() {
     let nodeElements = document.getElementsByClassName("node-thumbnail");
     for (let nodeElement of (nodeElements as any)) {
@@ -53,5 +63,4 @@ export class NetworkThumbnail {
         ($(this) as any).removeClass("hover");
     });
   }
-
 }
