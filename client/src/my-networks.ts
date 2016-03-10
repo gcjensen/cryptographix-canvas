@@ -5,6 +5,9 @@ import {Network, Graph, Direction, ComponentFactory, Kind, Node} from 'cryptogra
 import { ByteArrayEntry } from './bytearray-entry';
 import { ByteArrayViewer } from './bytearray-viewer';
 import { CryptoBox } from './crypto-box';
+import { GraphConfigDialog } from './graph-config-dialog';
+import { DialogService } from 'aurelia-dialog';
+
 
 
 @autoinject
@@ -15,8 +18,9 @@ export class MyNetworks {
   components: {};
   label: string;
   graphSelected: boolean;
-  
-  constructor(private http: HttpClient) {
+  dialogService: DialogService;
+ 
+  constructor(private http: HttpClient, dialogService: DialogService) {
     http.configure(config => {
       config
         .useStandardConfiguration()
@@ -26,6 +30,7 @@ export class MyNetworks {
     this.http = http;
     this.fetchNetworks();
     this.label = "My Networks";
+    this.dialogService = dialogService
   }
 
   fetchNetworks() {
@@ -35,7 +40,7 @@ export class MyNetworks {
       .then(data => {
         // if there are no saved networks, add an example one
         if (data.length === 0) {
-          this.saveNewGraph(exampleGraph);
+          this.saveNewGraph(exampleGraph, true);
         } else {
           for (var network of data)
             this.configureNetwork(network);
@@ -65,7 +70,7 @@ export class MyNetworks {
     this.label = "My Networks";
   }
 
-  save() {
+  save(network: Network) {
     this.http.fetch('updateNetwork', {
       method: 'post',
       body: json(this.network.graph.toObject({}))
@@ -75,16 +80,28 @@ export class MyNetworks {
       });
   }
 
-  saveNewGraph(graph: {}) {
+  saveNewGraph(graph: {}, isExampleGraph: boolean) {
     this.http.fetch('addNetwork', {
       method: 'post',
       body: json(graph)
     }).then(response => response.json())
       .then(data => {
-        this.fetchNetworks();  
+        // if it's example graph, load it
+        if (isExampleGraph)
+          this.fetchNetworks(); 
     });
   }
-          
+
+  newNetwork() {
+    this.dialogService.open({ viewModel: GraphConfigDialog }).then(response => {
+      if (!response.wasCancelled) {
+        let network = { graph: { "id": response.output } };
+        this.configureNetwork(network);
+        this.saveNewGraph(network.graph);
+      }
+    });
+  }
+
   configureNode(node: Node, graph: any) {
     node.metadata["view"] = {
       x: graph.nodes[node.id].metadata.view.x,
@@ -102,7 +119,7 @@ export class MyNetworks {
 }	
 
 var exampleGraph = {
-  "id": "Example Graph 2",
+  "id": "Example Graph 1",
   "nodes": {
     "bytearray-entry": {
       "component": "ByteArrayEntry",
