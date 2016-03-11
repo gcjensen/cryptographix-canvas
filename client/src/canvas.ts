@@ -42,8 +42,13 @@ export class Canvas {
       this.network.initialize();
     }).then(() => {
       this.network.graph.nodes.forEach(node => {
-          this.nodes.push(node);
+        this.nodes.push(node);
       });
+      document.getElementById("addNodeButton").classList.remove("shake");
+      if (this.nodes.length === 0)
+        // shake the 'add' button to show the user
+        document.getElementById("addNodeButton").classList.add("shake");
+      
       // microtask ensures the work is not done until each node has attached to the view
       this.taskQueue.queueMicroTask({
        call: () => this.setUpGraphUI()
@@ -99,6 +104,7 @@ export class Canvas {
         node.metadata.view.y = e.pos[1];
         self.isDragging = false;
         self.shouldNodeBeDeleted(node);
+        jsPlumb.repaintEverything();
       }
     });
   }
@@ -203,6 +209,7 @@ export class Canvas {
   }
 
   removeGraph(graph: any) {
+    jsPlumb.deleteEveryEndpoint();
     graph.nodes.forEach(function(node) {
       jsPlumb.remove(node.id);
     });
@@ -217,8 +224,8 @@ export class Canvas {
       if (!response.wasCancelled) {
         var node = response.output;
         // the node is placed in an arbitrary position
-        node.metadata.view.x = "300px";
-        node.metadata.view.y = "300px";
+        node.metadata.view.x = "50px";
+        node.metadata.view.y = "100px";
         this.network.teardown();
         this.network.graph.addNode(node.id, node.toObject()) 
         this.nodes.push(this.network.graph.getNodeByID(node.id));
@@ -255,6 +262,8 @@ export class Canvas {
     this.configureDomElement(node);
     this.addPortsToNode(node);
     jsPlumb.repaintEverything();
+    // shake to show the user the new node
+    document.getElementById(node.id).classList.add("shake");
   }
 
   createLink(sourceEndPointID: any, targetEndPointID: any, linkID: string) {  

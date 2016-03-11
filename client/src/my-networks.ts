@@ -38,6 +38,10 @@ export class MyNetworks {
     // offset according to the width and height of the text
     document.getElementById('page-title').style.marginLeft = "-280px";
     document.getElementById('page-title').style.marginTop = "-40px";
+
+    if (this.networks.length === 0)
+      document.getElementById("newNetworkButton").classList.add("shake");
+
   }
 
   fetchNetworks() {
