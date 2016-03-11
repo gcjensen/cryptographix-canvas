@@ -44,10 +44,9 @@ export class Canvas {
       this.network.graph.nodes.forEach(node => {
         this.nodes.push(node);
       });
-      document.getElementById("addNodeButton").classList.remove("shake");
       if (this.nodes.length === 0)
-        // shake the 'add' button to show the user
-        document.getElementById("addNodeButton").classList.add("shake");
+        // pulse the 'add' button to show the user
+        document.getElementById("addNodeButton").classList.add("pulse");
       
       // microtask ensures the work is not done until each node has attached to the view
       this.taskQueue.queueMicroTask({
@@ -220,6 +219,7 @@ export class Canvas {
   }
 
   addNode() {
+    document.getElementById("addNodeButton").classList.remove("pulse");
     this.dialogService.open({ viewModel: AddNodeDialog }).then(response => {
       if (!response.wasCancelled) {
         var node = response.output;

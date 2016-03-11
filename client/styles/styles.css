@@ -419,10 +419,8 @@ section.au-enter-active {
 }
 
 .shake {
-  animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+  animation: shake 0.82s cubic-bezier(0.9, 0.9, .02, .02) both;
   transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  perspective: 1000px;
 }
 
 @keyframes shake {
@@ -443,4 +441,21 @@ section.au-enter-active {
   }
 }
 
+.pulse {
+  animation: pulse 1s ease infinite;
+  /* transition: transform 0.2s; */
+}
 
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}

@@ -17,6 +17,7 @@ export class MyNetworks {
   label: string;
   graphSelected: boolean;
   dialogService: DialogService;
+  fetchCalled: boolean;
 
   // to be passed to the thumbnail so deleteNetwork and loadNetwork can be called
   self = this;
@@ -39,9 +40,14 @@ export class MyNetworks {
     document.getElementById('page-title').style.marginLeft = "-280px";
     document.getElementById('page-title').style.marginTop = "-40px";
 
-    if (this.networks.length === 0)
-      document.getElementById("newNetworkButton").classList.add("shake");
-
+    /* 
+     * attached and fetchNetworks get called in a different order depending
+     * on whether the page is loaded/refreshed, or transitioned to from another
+     * page, therefore the fetchCalled boolean is needed
+     */
+    if (this.fetchCalled && this.networks.length === 0) {
+      document.getElementById("newNetworkButton").classList.add("pulse");
+    }
   }
 
   fetchNetworks() {
@@ -49,6 +55,9 @@ export class MyNetworks {
         method: 'get'
     }).then(response => response.json())
       .then(data => {
+        this.fetchCalled = true;
+        if (data.length === 0)
+          document.getElementById("newNetworkButton").classList.add("pulse");
         for (var network of data)
           this.configureNetwork(network);
       }); 
@@ -86,7 +95,7 @@ export class MyNetworks {
       });
   }
 
-  saveNewGraph(graph: {}, isExampleGraph: boolean) {
+  saveNewGraph(graph: {}) {
     this.http.fetch('addNetwork', {
       method: 'post',
       body: json(graph)
@@ -97,6 +106,7 @@ export class MyNetworks {
   }
 
   newNetwork() {
+    document.getElementById("newNetworkButton").classList.remove("pulse");
     this.dialogService.open({ viewModel: NetworkConfigDialog }).then(response => {
       if (!response.wasCancelled) {
         let network = { graph: { "id": response.output } };
