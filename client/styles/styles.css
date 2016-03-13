@@ -165,12 +165,16 @@ body {
   top: 15px;
 }
 
-.btn-play {
+.btn-save {
   top: 80px;
 }
 
-.btn-add {
+.btn-play {
   top: 145px;
+}
+
+.btn-add {
+  top: 210px;
 }
 
 .btn-circle.btn-lg:hover {

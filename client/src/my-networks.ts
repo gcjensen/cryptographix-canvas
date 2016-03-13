@@ -1,7 +1,7 @@
 import {autoinject} from 'aurelia-framework';
 import {HttpClient, json} from 'aurelia-fetch-client';
 import 'fetch';
-import {Network, Graph, Direction, ComponentFactory, Kind, Node} from 'cryptographix-sim-core';
+import {Network, Graph, Direction, ComponentFactory, Kind, Node, RunState} from 'cryptographix-sim-core';
 import { ByteArrayEntry } from './bytearray-entry';
 import { ByteArrayViewer } from './bytearray-viewer';
 import { CryptoBox } from './crypto-box';
@@ -18,6 +18,7 @@ export class MyNetworks {
   graphSelected: boolean;
   dialogService: DialogService;
   fetchCalled: boolean;
+  isSaving: boolean = false;
 
   // to be passed to the thumbnail so deleteNetwork and loadNetwork can be called
   self = this;
@@ -81,17 +82,21 @@ export class MyNetworks {
   }
 
   back() {
+    if (this.network.graph.context.runState === RunState.RUNNING)
+      this.network.stop();
     this.graphSelected = false;
     this.label = "My Networks";
   }
 
   save(network: Network) {
+    this.isSaving = true;
     this.http.fetch('updateNetwork', {
       method: 'post',
       body: json(this.network.graph.toObject({}))
     }).then(response => response.json())
       .then(data => {
         console.log(data);
+        this.isSaving = false;
       });
   }
 

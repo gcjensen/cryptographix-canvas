@@ -28,10 +28,13 @@
               <i class="fa fa-plus"></i>
               <span>New Network</span>
             </button>
-            <button if.bind="graphSelected" click.trigger="save(network)" type="button" class="btn navbar-btn">
+            <li style="margin-right: 10px; margin-top: 12px; color: #77aca7" class="loader" if.bind="isSaving">
+              <i class="fa fa-circle-o-notch fa-spin fa-2x"></i>
+            </li>
+<!--             <button if.bind="graphSelected" click.trigger="save(network)" type="button" class="btn navbar-btn">
               <i class="fa fa-floppy-o"></i>
               <span>Save</span>
-            </button>
+            </button> -->
           </ul>
         </div>
       </div>
@@ -42,6 +45,8 @@
     <h2 show.bind="networks.length === 0" id="page-title" class="page-title">NO NETWORKS</h2>
 
     <canvas if.bind="graphSelected" network.bind="network"></canvas>
+
+    <button if.bind="graphSelected" type="button" class="${network.graph.context.runState === 4 ? 'disabled' : ''} btn btn-circle btn-lg btn-save" click.trigger="save(network)"><i class="fa fa-save"></i></button> 
 
     <div class="panels">
       <network-thumbnail repeat.for="network of networks" if.bind="!graphSelected" network.bind="network" container.bind="self"></network-thumbnail>

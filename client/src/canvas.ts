@@ -2,7 +2,7 @@ import {autoinject, customElement, bindable, containerless, TaskQueue} from 'aur
 import {DialogService} from 'aurelia-dialog';
 import {LinkConfigDialog} from './link-config-dialog';
 import {AddNodeDialog} from './add-node-dialog';
-import {Network, Node, Link, Direction} from 'cryptographix-sim-core';
+import {Network, Node, Link, Direction, RunState} from 'cryptographix-sim-core';
 import {Animation} from './animation';
 
 @autoinject
@@ -92,15 +92,18 @@ export class Canvas {
     nodeElement.style.top = parseInt(node.metadata.view.y) + "px";
     nodeElement.style.width = parseInt(node.metadata.view.width) + "px";
     nodeElement.style.height = parseInt(node.metadata.view.height) + "px";
+    this.configureNodeDragging(node);
+  }
 
+  configureNodeDragging(node: Node) {
     var self = this;
     jsPlumb.draggable([node.id], {
       start: function(e) {
         self.isDragging = true;
       },
-      stop: function(e) {
-        node.metadata.view.x = e.pos[0];    
-        node.metadata.view.y = e.pos[1];
+      stop: function(e) {        
+        node.metadata.view.x = e.pos[0];
+        node.metadata.view.y = e.pos[1];   
         self.isDragging = false;
         self.shouldNodeBeDeleted(node);
         jsPlumb.repaintEverything();
@@ -128,13 +131,15 @@ export class Canvas {
   }
 
   connectNodes(links: Map<string, Link>) {
+    var self = this;
     links.forEach(function(link) {
-      (jsPlumb.connect({
+      var connection = jsPlumb.connect({
         uuids: [link.fromNode.id + ":" + link.fromPort.id, link.toNode.id + ":" + link.toPort.id],
         endpointStyle: { fillStyle: "#77aca7", radius: 4 },
         hoverPaintStyle: { radius: 8 },
         paintStyle: { strokeStyle: "#77aca7", lineWidth: 4 }
-      }) as any).id = link.toObject()["id"]; 
+      });
+      (connection as any).id = link.toObject()["id"]; 
       // connection is cast to any, because jsPlumb typescript definitions don't include .id for some reason     
     });
   }
@@ -161,6 +166,10 @@ export class Canvas {
         jsPlumb.detach(conn);
     });
 
+    jsPlumb.bind("beforeDetach", function(params) {
+      return !self.isNetworkRunning();
+    });
+
     /* 
      * beforeDrop doesn't provide information about the source endpoint, therefore
      * beforeStartDetach (when the link is being dragged from a port that already has another link) 
@@ -169,12 +178,12 @@ export class Canvas {
      */
     jsPlumb.bind("beforeStartDetach", function(params) {
       self.newConnectionSource = params.endpoint.getUuid();
-      return true;
+      return !self.isNetworkRunning();
     });
 
     jsPlumb.bind("beforeDrag", function(params) {
       self.newConnectionSource = params.endpoint.getUuid();
-      return true;
+      return !self.isNetworkRunning();
     });
 
     // used newConnectionSource and the dropEndpoint to determine whether the link can be made
@@ -216,27 +225,40 @@ export class Canvas {
 
   runNetwork() {
     this.network.start();
+    this.toggleDragging(false);
+  }
+
+  stopNetwork() {
+    this.network.stop();
+    this.toggleDragging(true);
+  }
+
+  toggleDragging(canDrag: boolean) {
+    this.network.graph.nodes.forEach(node => {
+      jsPlumb.setDraggable(node.id, canDrag);
+    });
   }
 
   addNode() {
-    document.getElementById("addNodeButton").classList.remove("pulse");
-    this.dialogService.open({ viewModel: AddNodeDialog }).then(response => {
-      if (!response.wasCancelled) {
-        var node = response.output;
-        // the node is placed in an arbitrary position
-        node.metadata.view.x = "50px";
-        node.metadata.view.y = "100px";
-        this.network.teardown();
-        this.network.graph.addNode(node.id, node.toObject()) 
-        this.nodes.push(this.network.graph.getNodeByID(node.id));
-        this.taskQueue.queueMicroTask({
-          call: () => this.configureNewNode(node)
-        });
-        this.network.loadComponents().then(() => {
-          this.network.initialize();
-        });
-      }
-    });
+    if (!this.isNetworkRunning()) {
+      document.getElementById("addNodeButton").classList.remove("pulse");
+      this.dialogService.open({ viewModel: AddNodeDialog }).then(response => {
+        if (!response.wasCancelled) {
+          this.network.teardown();
+          // a proper copy of the node is taken, so that the same reference isn't referred to
+          var node = JSON.parse(JSON.stringify(response.output.toObject()));
+          this.network.graph.addNode(node.id, node);
+          node = this.network.graph.getNodeByID(node.id);
+          this.nodes.push(node);
+          this.taskQueue.queueMicroTask({
+            call: () => this.configureNewNode(node)
+          });
+          this.network.loadComponents().then(() => {
+            this.network.initialize();
+          });
+        }
+      });
+    }
   }
 
   /* 
@@ -259,6 +281,9 @@ export class Canvas {
   }
 
   configureNewNode(node: Node) {
+    // the node is placed in an arbitrary position
+    node.metadata.view.x = "50px";
+    node.metadata.view.y = "100px";
     this.configureDomElement(node);
     this.addPortsToNode(node);
     jsPlumb.repaintEverything();
@@ -271,7 +296,8 @@ export class Canvas {
       this.dialogService.open({ viewModel: LinkConfigDialog }).then(response => {
         if (!response.wasCancelled) {
           // rename the jsPlumb connection instance to the user chosen name
-          jsPlumb.getConnections()[jsPlumb.getConnections().length - 1].id = response.output;          
+          var jsPlumbConnection = jsPlumb.getConnections()[jsPlumb.getConnections().length - 1];
+          jsPlumbConnection.id = response.output; 
           this.network.teardown();
           // endpoint UUIDs contain information about the node they're on, so we must split this ou 
           this.network.graph.addLink(response.output, {
@@ -357,6 +383,10 @@ export class Canvas {
 
   isZoomedIn(node: Node) {
     return document.getElementById(node.id).style.width !== node.metadata.view.width;
+  }
+
+  isNetworkRunning() {
+    return this.network.graph.context.runState === RunState.RUNNING;
   }
 
 }

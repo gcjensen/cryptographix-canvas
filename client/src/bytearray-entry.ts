@@ -10,6 +10,7 @@ export class ByteArrayEntryVM {
 
   @bindable text: string = '';
   @bindable encoding: string = 'HEX';
+  running: boolean = false;
 
   private _component: ByteArrayEntry;
   activate(component: ByteArrayEntry) {
@@ -23,13 +24,23 @@ export class ByteArrayEntryVM {
     }
   }
 
+  startComponent() {
+    this.running = true;
+    this.textChanged(this.text);
+  }
+
+  stopComponent() {
+    this.running = false;
+  }
+
   encodingChanged(newValue: string) {
     this.encoding = newValue;
     this._component.setEncoding(ByteArray.stringToEncoding(newValue));
   }
 
   textChanged(newValue) {
-    //this._component.setText(newValue);
+    if (this.running)
+      this._component.setText(newValue);
   }
 }
 
@@ -65,10 +76,13 @@ export class ByteArrayEntry implements Component {
   }
 
   start() {
-    this.setText(this.view.text);
+    this.view.startComponent();
   }
 
-  stop() { }
+  stop() { 
+    this.view.stopComponent();
+  }
+
   pause() { }
   resume() { }
 

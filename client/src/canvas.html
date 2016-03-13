@@ -1,13 +1,16 @@
 <template>
   <require from="node-element"></require>
 
-  <button type="button" class="btn btn-circle btn-lg btn-play" click.trigger="runNetwork()"><i class="fa fa-play"></i></button> 
-
-  <button id="addNodeButton" type="button" class="btn btn-circle btn-lg btn-add" click.trigger="addNode()"><i class="fa fa-plus"></i></button> 
-
   <div id="canvas">
     <node-element repeat.for="node of nodes" node.bind="node" style.bind="nodeStyle"></node-element>
   </div>
+
+  <!-- 4 is the value of the run state RUNNING -->
+  <button if.bind="network.graph.context.runState !== 4" type="button" class="btn btn-circle btn-lg btn-play" click.trigger="runNetwork()"><i class="fa fa-play"></i></button> 
+
+  <button if.bind="network.graph.context.runState === 4" type="button" class="btn btn-circle btn-lg btn-play" click.trigger="stopNetwork()"><i class="fa fa-stop"></i></button> 
+
+  <button id="addNodeButton" type="button" class="${network.graph.context.runState === 4 ? 'disabled' : ''} btn btn-circle btn-lg btn-add" click.trigger="addNode()"><i class="fa fa-plus"></i></button> 
 
   <div id="trash" show.bind="isDragging" class="trash"><i style="font-size: 45px" class="fa fa-trash-o"></i></div> 
 
