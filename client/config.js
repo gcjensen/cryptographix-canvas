@@ -16,7 +16,7 @@ System.config({
   map: {
     "aurelia-animator-css": "npm:aurelia-animator-css@1.0.0-beta.1.1.2",
     "aurelia-bootstrapper": "npm:aurelia-bootstrapper@1.0.0-beta.1.1.4",
-    "aurelia-dialog": "npm:aurelia-dialog@0.5.7",
+    "aurelia-dialog": "npm:aurelia-dialog@0.5.8",
     "aurelia-fetch-client": "npm:aurelia-fetch-client@1.0.0-beta.1.1.1",
     "aurelia-framework": "npm:aurelia-framework@1.0.0-beta.1.1.4",
     "aurelia-history-browser": "npm:aurelia-history-browser@1.0.0-beta.1.1.4",
@@ -29,7 +29,7 @@ System.config({
     "babel": "npm:babel-core@5.8.35",
     "babel-runtime": "npm:babel-runtime@5.8.35",
     "bootstrap": "github:twbs/bootstrap@3.3.6",
-    "core-js": "npm:core-js@2.1.3",
+    "core-js": "npm:core-js@2.1.5",
     "cryptographix-sim-core": "npm:cryptographix-sim-core@0.1.6",
     "fetch": "github:github/fetch@0.10.1",
     "font-awesome": "npm:font-awesome@4.5.0",
@@ -73,7 +73,7 @@ System.config({
       "aurelia-logging-console": "npm:aurelia-logging-console@1.0.0-beta.1.1.4",
       "aurelia-pal": "npm:aurelia-pal@1.0.0-beta.1.1.1",
       "aurelia-pal-browser": "npm:aurelia-pal-browser@1.0.0-beta.1.1.4",
-      "aurelia-polyfills": "npm:aurelia-polyfills@1.0.0-beta.1.0.1",
+      "aurelia-polyfills": "npm:aurelia-polyfills@1.0.0-beta.1.0.6",
       "aurelia-router": "npm:aurelia-router@1.0.0-beta.1.1.3",
       "aurelia-templating": "npm:aurelia-templating@1.0.0-beta.1.1.4",
       "aurelia-templating-binding": "npm:aurelia-templating-binding@1.0.0-beta.1.1.2",
@@ -85,7 +85,7 @@ System.config({
       "aurelia-metadata": "npm:aurelia-metadata@1.0.0-beta.1.1.6",
       "aurelia-pal": "npm:aurelia-pal@1.0.0-beta.1.1.1"
     },
-    "npm:aurelia-dialog@0.5.7": {
+    "npm:aurelia-dialog@0.5.8": {
       "aurelia-dependency-injection": "npm:aurelia-dependency-injection@1.0.0-beta.1.1.5",
       "aurelia-metadata": "npm:aurelia-metadata@1.0.0-beta.1.1.6",
       "aurelia-pal": "npm:aurelia-pal@1.0.0-beta.1.1.1",
@@ -128,7 +128,7 @@ System.config({
     "npm:aurelia-pal-browser@1.0.0-beta.1.1.4": {
       "aurelia-pal": "npm:aurelia-pal@1.0.0-beta.1.1.1"
     },
-    "npm:aurelia-polyfills@1.0.0-beta.1.0.1": {
+    "npm:aurelia-polyfills@1.0.0-beta.1.0.6": {
       "aurelia-pal": "npm:aurelia-pal@1.0.0-beta.1.1.1"
     },
     "npm:aurelia-route-recognizer@1.0.0-beta.1.1.3": {
@@ -185,7 +185,7 @@ System.config({
     "npm:colors@1.1.2": {
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
-    "npm:core-js@2.1.3": {
+    "npm:core-js@2.1.5": {
       "fs": "github:jspm/nodelibs-fs@0.1.2",
       "path": "github:jspm/nodelibs-path@0.1.0",
       "process": "github:jspm/nodelibs-process@0.1.2",
