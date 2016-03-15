@@ -7,7 +7,8 @@
         </a>
       </div>
 
-      <div class="navbar-collapse collapse navbar-right">
+
+      <div if.bind="isAuthenticated" class="navbar-collapse collapse navbar-left">
         <ul class="nav navbar-nav">
           <li repeat.for="row of router.navigation" class="navbar-links">
             <a data-toggle="collapse" data-target="#navbar-collapse.in" href.bind="row.href" class="${row.isActive ? 'selected' : ''}">
@@ -23,6 +24,35 @@
           </li>
         </ul>
       </div>
+
+      <div if.bind="!isAuthenticated" class="navbar-collapse collapse navbar-right">
+        <ul class="nav navbar-nav">
+          <li class="navbar-links">
+            <a class="${currentRoute === '/' || currentRoute === '/login' ? 'selected' : ''}" href="/#/login">
+              <i class="fa fa-sign-in"></i>
+              <span>Login</span>
+            </a>
+          </li>
+          <li class="navbar-links">
+            <a class="${currentRoute === '/signup' ? 'selected' : ''}" href="/#/signup">
+              <i class="fa fa-user-plus"></i>
+              <span>Signup</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div if.bind="isAuthenticated" class="navbar-collapse collapse navbar-right">
+        <ul class="nav navbar-nav">
+          <li class="navbar-links">
+            <a href="/#/logout" click.trigger="logout()">
+              <i class="fa fa-sign-out"></i>
+              <span>Logout</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
     </div>
   </nav>
 </template>

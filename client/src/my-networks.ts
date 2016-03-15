@@ -27,7 +27,12 @@ export class MyNetworks {
     http.configure(config => {
       config
         .useStandardConfiguration()
-        .withBaseUrl('http://localhost:8080/api/');
+        .withBaseUrl('http://localhost:8080/api/')
+        .withDefaults({
+          headers: {
+            'authorization': localStorage.getItem('jwt')
+          }
+        })
     });
     
     this.http = http;
@@ -37,6 +42,7 @@ export class MyNetworks {
   }
 
   attached() {
+
     // offset according to the width and height of the text
     document.getElementById('page-title').style.marginLeft = "-280px";
     document.getElementById('page-title').style.marginTop = "-40px";
@@ -52,7 +58,7 @@ export class MyNetworks {
   }
 
   fetchNetworks() {
-    return this.http.fetch('getNetworks', {
+    return this.http.fetch('getUserNetworks', {
         method: 'get'
     }).then(response => response.json())
       .then(data => {
