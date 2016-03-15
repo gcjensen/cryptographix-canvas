@@ -99,6 +99,7 @@ interface ConnectParams {
 
 interface DragOptions {
   containment?: string;
+  start?: {};
   stop?: {};
 }
 

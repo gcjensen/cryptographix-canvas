@@ -217,7 +217,7 @@ export class Canvas {
   }
 
   removeGraph(graph: any) {
-    jsPlumb.deleteEveryEndpoint();
+    (jsPlumb as any).deleteEveryEndpoint();
     graph.nodes.forEach(function(node) {
       jsPlumb.remove(node.id);
     });

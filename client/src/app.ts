@@ -41,10 +41,10 @@ export class App {
 
 class AuthorizeStep {
   run(navigationInstruction: NavigationInstruction, next: Function): Promise<any> {
-    if (navigationInstruction.getAllInstructions().some(i => i.config.auth)) {
+    if (navigationInstruction.getAllInstructions().some(i => (i.config as any).auth)) {
       var isLoggedIn = localStorage.getItem("jwt") !== null;
       if (!isLoggedIn) {
-        return next.cancel(new Redirect('login'));
+        return (next as any).cancel(new Redirect('login'));
       }
     }
 
