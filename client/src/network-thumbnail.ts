@@ -14,7 +14,7 @@ export class NetworkThumbnail {
   container: any;
 
   constructor(taskQueue: TaskQueue) {
-    this.taskQueue = taskQueue;  
+    this.taskQueue = taskQueue;
   }
 
   attached() {

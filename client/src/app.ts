@@ -4,7 +4,7 @@ export class App {
   router: Router;
  
   configureRouter(config: RouterConfiguration, router: Router) {
-    config.title = 'comp3200';
+    config.title = 'CryptoGraphix Canvas';
     config.addPipelineStep('authorize', AuthorizeStep);
 
     config.map([

@@ -19,6 +19,10 @@ export class CryptoBoxVM {
     this.op = 'encrypt';
   }
 
+  attached() {
+    $('#errorPopover').popover({ trigger: "hover" });
+  }
+
   @bindable
   sizeIV: number = 0;
   @bindable
@@ -30,8 +34,10 @@ export class CryptoBoxVM {
   @bindable
   op: string;
 
+  errors: string;
+  errorCount: number = 0;
 
-  opChanged(op){  
+  opChanged(op) { 
     this.op = op;
     this.algorithmChanged(this.algorithm);
   }
@@ -44,23 +50,34 @@ export class CryptoBoxVM {
     this.algorithm = algorithm;
     let iv;
 
-    if ( this.algorithm == 'DES-ECB' ) {
-
+    if (this.algorithm == 'DES-ECB') {
+      this.errors = "";
+      this.errorCount = 0;
       this.sizeIV = 0;
     }
-    else if( this.algorithm == 'DES-CBC' ) {
-
-      iv = new ByteArray( this.iv, ByteArray.HEX );
-      this.sizeIV = 8;
-      if (iv.length !== this.sizeIV) {
-        var ivInput = document.getElementById("iv-input");
-        ivInput.classList.add("has-error");
-      } else {
-        var ivInput = document.getElementById("iv-input");
-        ivInput.classList.remove("has-error");
-      }
+    else if (this.algorithm == 'DES-CBC') {
+      try {
+        this.errors = "";
+        this.errorCount = 0;
+        iv = new ByteArray(this.iv, ByteArray.HEX);
+        this.sizeIV = 8;
+        if (iv.length !== this.sizeIV) {
+          let error = "<p>IV must be 8 bytes</p>";
+          // prevent the same error appearing multiple times
+          if (this.errors.indexOf(error) === -1) {
+            this.errors += error;
+            this.errorCount++;
+          }
+        } else {
+          this.errors = "";
+          this.errorCount = 0;
+        }
+      } catch(error) {
+        this.errors += error;
+        this.errorCount++;
+     }
+ 
     }
-
     this._component.setAlgorithm( this.op, this.algorithm, iv );
   }
 }

@@ -11,8 +11,11 @@ export class ByteArrayEntryVM {
   @bindable text: string = '';
   @bindable encoding: string = 'HEX';
   running: boolean = false;
+  errors: string;
+  errorCount: number = 0;
 
   private _component: ByteArrayEntry;
+
   activate(component: ByteArrayEntry) {
     this._component = component;
 
@@ -24,6 +27,10 @@ export class ByteArrayEntryVM {
     }
   }
 
+  attached() {
+    $('#errorPopover').popover({ trigger: "hover" });
+  }
+
   startComponent() {
     this.running = true;
     this.textChanged(this.text);
@@ -31,6 +38,8 @@ export class ByteArrayEntryVM {
 
   stopComponent() {
     this.running = false;
+    this.errors = "";
+    this.errorCount = 0;
   }
 
   encodingChanged(newValue: string) {
@@ -39,8 +48,16 @@ export class ByteArrayEntryVM {
   }
 
   textChanged(newValue) {
-    if (this.running)
-      this._component.setText(newValue);
+    if (this.running) {
+      try {
+        this.errors = "";
+        this.errorCount = 0;
+        this._component.setText(newValue);
+      } catch(error) {
+        this.errors += "<p>" + error + "</p>";
+        this.errorCount++;
+      }
+    }
   }
 }
 

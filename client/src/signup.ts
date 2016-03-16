@@ -10,6 +10,12 @@ export class Signup {
   password: string;
   router: Router;
 
+  attached() {
+    // dont' allow access to signup screen if user is already logged in
+    if (localStorage.getItem("jwt") !== null)
+      this.router.navigate("/my-networks");
+  }
+
   constructor(private http: HttpClient, router: Router) {
     http.configure(config => {
       config
