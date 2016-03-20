@@ -1,4 +1,4 @@
-# comp3200
+# CryptoGraphix Canvas
 Web-Based Visual Modelling for Secure Systems and Networks.
 
 Author: George Jensen
