@@ -242,7 +242,7 @@ export class Canvas {
   addNode() {
     if (!this.isNetworkRunning()) {
       document.getElementById("addNodeButton").classList.remove("pulse");
-      this.dialogService.open({ viewModel: AddNodeDialog }).then(response => {
+      this.dialogService.open({ viewModel: AddNodeDialog, model: this.getTakenNames() }).then(response => {
         if (!response.wasCancelled) {
           this.network.teardown();
           // a proper copy of the node is taken, so that the same reference isn't referred to
@@ -387,6 +387,14 @@ export class Canvas {
 
   isNetworkRunning() {
     return this.network.graph.context.runState === RunState.RUNNING;
+  }
+
+  getTakenNames() {
+    var takenNames = [];
+    this.network.graph.nodes.forEach(node => {
+      takenNames.push(node.id);
+    });
+    return takenNames;
   }
 
 }

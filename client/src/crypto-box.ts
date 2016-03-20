@@ -8,6 +8,7 @@ import { CryptographicServiceProvider } from 'cryptographix-sim-core';
 export class CryptoBoxVM {
 
   private _component: CryptoBox;
+  running: boolean = false;
 
   activate(component) {
     this._component = component;

@@ -16,6 +16,7 @@ export class AddNodeDialog {
   componentName: string;
   selectedNode: Node;
   nodeID: string = "";
+  takenNames: [] = [];
 
   constructor(controller: DialogController, taskQueue: TaskQueue) {
     this.controller = controller;
@@ -32,6 +33,10 @@ export class AddNodeDialog {
     this.taskQueue.queueMicroTask({
       call: () => this.configureDomElements()
     });
+  }
+
+  activate(takenName: []) {
+    this.takenNames = takenName;
   }
 
   nodeSelected(node: Node) {
@@ -59,7 +64,7 @@ export class AddNodeDialog {
     ($(".node-palette") as any).mouseover(function() {
       if (self.selectedNode === undefined) {
         self.componentName = this.id;
-        if (self.nodeID !== "")
+        if (self.nodeID !== "" && self.takenNames.indexOf(self.nodeID) === -1)
           (document.getElementById("addButton") as any).disabled = false;
       }
     })
@@ -71,9 +76,9 @@ export class AddNodeDialog {
     });
 
     // the user can only procede if they've their new node an id, so the add
-    // button is only enabled if their is text in the 'id-input' field
+    // button is only enabled if there is text in the 'id-input' field
     ($("#id-input") as any).keyup(function () {
-      if (self.selectedNode !== undefined && self.nodeID !== "") {
+      if (self.selectedNode !== undefined && self.nodeID !== "" && self.takenNames.indexOf(self.nodeID) === -1) {
         (document.getElementById("addButton") as any).disabled = false;
         if (self.selectedNode)
           self.selectedNode.id = self.nodeID;
@@ -123,5 +128,17 @@ var nodes = {
     "ports": {
       'in': { "direction": "IN" },
     }
-  }
+  },
+  "emv-card-simulator": {
+    "id": "emv-card-simulator",
+    "component": "EMVCardSimulator",
+    "metadata": { 
+      "view": { "width": "200px", "height": "130px" },
+      "icon": "credit-card",
+      "vm": "emv-card-simulator"
+    },
+    "ports": {
+      'in': { "direction": "IN" },
+    }
+  },
 }

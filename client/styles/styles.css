@@ -187,7 +187,6 @@ body {
 }
 
 .node-regular {
-  resize: both;
   overflow: auto;
   background-color: white;
   height:100%;
@@ -234,6 +233,15 @@ body {
   margin-top: 17px;
   -webkit-user-select: none;
   transition: font-size 0.4s, margin-top 0.4s;
+}
+
+.node-regular > .card-icon {
+  color: #77aca7;
+  font-size: 40px;
+  text-align: center; 
+  margin-top: 30px;
+  margin-left: 35px;
+  -webkit-user-select: none;
 }
 
 .node-thumbnail > .component-name {

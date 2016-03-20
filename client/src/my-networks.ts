@@ -5,6 +5,7 @@ import {Network, Graph, Direction, ComponentFactory, Kind, Node, RunState} from 
 import { ByteArrayEntry } from './bytearray-entry';
 import { ByteArrayViewer } from './bytearray-viewer';
 import { CryptoBox } from './crypto-box';
+import { EMVCardSimulator } from './emv-card-simulator';
 import { NetworkConfigDialog } from './network-config-dialog';
 import { DialogService } from 'aurelia-dialog';
 
@@ -76,6 +77,7 @@ export class MyNetworks {
     factory.register( 'ByteArrayEntry', ByteArrayEntry );
     factory.register( 'ByteArrayViewer', ByteArrayViewer );
     factory.register( 'CryptoBox', CryptoBox );
+    factory.register( 'EMVCardSimulator', EMVCardSimulator);
     graph.nodes.forEach(node => { this.configureNode(node, network.graph) });
     this.networks.push(new Network(factory, graph));
   }
@@ -118,7 +120,7 @@ export class MyNetworks {
 
   newNetwork() {
     document.getElementById("newNetworkButton").classList.remove("pulse");
-    this.dialogService.open({ viewModel: NetworkConfigDialog }).then(response => {
+    this.dialogService.open({ viewModel: NetworkConfigDialog, model: this.getTakenNames() }).then(response => {
       if (!response.wasCancelled) {
         let network = { graph: { "id": response.output } };
         this.configureNetwork(network);
@@ -144,6 +146,14 @@ export class MyNetworks {
       width: graph.nodes[node.id].metadata.view.width,
       height: graph.nodes[node.id].metadata.view.height
     }
+  }
+
+  getTakenNames() {
+    var takenNames = [];
+    this.networks.forEach(network => {
+      takenNames.push(network.graph.id);
+    });
+    return takenNames;
   }
 
   // temporary function to enable testing of graph modifications

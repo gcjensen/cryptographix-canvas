@@ -4,13 +4,13 @@
       <h2>Configure your new network</h2>
       <div class="input-group">
         <span class="input-group-addon" id="basic-addon1">ID</span>
-        <input value.bind="graphID" type="text" class="form-control" aria-describedby="basic-addon1">
+        <input id="id-input" value.bind="graphID" type="text" class="form-control" aria-describedby="basic-addon1">
       </div>
     </ai-dialog-body>
 
     <ai-dialog-footer>
       <button click.trigger="controller.cancel()">Cancel</button>
-      <button click.trigger="controller.ok(graphID)">OK</button>
+      <button id="okButton" click.trigger="controller.ok(graphID)">OK</button>
     </ai-dialog-footer>
   </ai-dialog>
 </template>
