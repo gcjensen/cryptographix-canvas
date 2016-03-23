@@ -16,7 +16,7 @@ export class AddNodeDialog {
   componentName: string;
   selectedNode: Node;
   nodeID: string = "";
-  takenNames: [] = [];
+  takenNames: Array<string> = [];
 
   constructor(controller: DialogController, taskQueue: TaskQueue) {
     this.controller = controller;
@@ -35,7 +35,7 @@ export class AddNodeDialog {
     });
   }
 
-  activate(takenName: []) {
+  activate(takenName: Array<string>) {
     this.takenNames = takenName;
   }
 

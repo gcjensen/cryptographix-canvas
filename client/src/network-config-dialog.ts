@@ -6,13 +6,13 @@ export class NetworkConfigDialog {
 
   graphID: string;
   controller: DialogController;
-  takenNames: [] = [];
+  takenNames: Array<string> = [];
 
   constructor(controller: DialogController) {
     this.controller = controller;
   }
 
-  activate(takenNames: []) {
+  activate(takenNames: Array<string>) {
     this.takenNames = takenNames;
   }
 

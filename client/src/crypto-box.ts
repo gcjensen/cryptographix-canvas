@@ -1,6 +1,7 @@
 import { customElement, autoinject, bindable, inlineView, child } from 'aurelia-framework';
 import { ByteArray, Component, Kind, EndPoint, Direction, Message, Channel } from 'cryptographix-sim-core';
 import { CryptographicServiceProvider } from 'cryptographix-sim-core';
+import { Wiretap } from './wiretap';
 
 @customElement('crypto-box')
 @autoinject()
@@ -20,8 +21,12 @@ export class CryptoBoxVM {
     this.op = 'encrypt';
   }
 
+  constructor(wiretap: Wiretap) {
+    this.wiretap = wiretap;
+  }
+
   attached() {
-    $('#errorPopover').popover({ trigger: "hover" });
+    ($('#errorPopover') as any).popover({ trigger: "hover" });
   }
 
   @bindable
@@ -37,6 +42,7 @@ export class CryptoBoxVM {
 
   errors: string;
   errorCount: number = 0;
+  wiretap: Wiretap;
 
   opChanged(op) { 
     this.op = op;
@@ -102,6 +108,7 @@ export class CryptoBox implements Component {
 
   view: any;
   icon: string = "lock";
+  wiretap: Wiretap;
 
   bindView( view: any ) {
     this.view = view;
@@ -159,7 +166,7 @@ export class CryptoBox implements Component {
         this._cryptoProvider.encrypt( algo as Algorithm, this._key, data )
           .then( ( cipherText: ByteArray ) => {
             let msg = new Message<ByteArray>({}, cipherText );
-
+            this.view.wiretap.checkForWiretaps(this._dataOut, (msg.payload as any).byteArray.toString());         
             ep.sendMessage(msg);
           });
       }
@@ -167,7 +174,7 @@ export class CryptoBox implements Component {
         this._cryptoProvider.decrypt( algo as Algorithm, this._key, data )
           .then( ( plainText: ByteArray ) => {
             let msg = new Message<ByteArray>({}, plainText );
-
+            this.view.wiretap.checkForWiretaps(this._dataOut, (msg.payload as any).byteArray.toString());         
             ep.sendMessage(msg);
           });
       }
@@ -203,8 +210,9 @@ export class CryptoBox implements Component {
     this._dataOut = null;
   }
 
-  start() { }
-  stop() { }
-  pause() { }
-  resume() { }
+  start() {}
+  stop() {}
+  pause() {}
+  resume() {}
+
 }

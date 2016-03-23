@@ -2,8 +2,9 @@ import {autoinject, customElement, bindable, containerless, TaskQueue} from 'aur
 import {DialogService} from 'aurelia-dialog';
 import {LinkConfigDialog} from './link-config-dialog';
 import {AddNodeDialog} from './add-node-dialog';
-import {Network, Node, Link, Direction, RunState} from 'cryptographix-sim-core';
+import {Network, Node, Link, Direction, RunState, EndPoint} from 'cryptographix-sim-core';
 import {Animation} from './animation';
+import { Wiretap } from './wiretap';
 
 @autoinject
 @containerless()
@@ -18,10 +19,13 @@ export class Canvas {
   isDragging = false;
   nodeStyle = "regular";
   newConnectionSource: string;
+  wiretap: Wiretap;
+  showWiretapPanel: boolean = false;
 
-  constructor(taskQueue: TaskQueue, dialogService: DialogService) {
+  constructor(taskQueue: TaskQueue, dialogService: DialogService, wiretap: Wiretap) {
     this.taskQueue = taskQueue;
-    this.dialogService = dialogService
+    this.dialogService = dialogService;
+    this.wiretap = wiretap;
   }
 
   attached() {
@@ -40,6 +44,7 @@ export class Canvas {
     // the network object has been bound to canvas in the view
     this.network.loadComponents().then(() => {
       this.network.initialize();
+      this.configureWiretaps();
     }).then(() => {
       this.network.graph.nodes.forEach(node => {
         this.nodes.push(node);
@@ -139,8 +144,10 @@ export class Canvas {
         hoverPaintStyle: { radius: 8 },
         paintStyle: { strokeStyle: "#77aca7", lineWidth: 4 }
       });
-      (connection as any).id = link.toObject()["id"]; 
-      // connection is cast to any, because jsPlumb typescript definitions don't include .id for some reason     
+      // connection is cast to any, because jsPlumb typescript definitions don't include .id for some reason
+      (connection as any).id = link.toObject()["id"];
+      self.registerConnectionEvents(connection);
+      if ((link as any).metadata.wiretap) self.addWiretapOverlay(connection);
     });
   }
 
@@ -161,7 +168,6 @@ export class Canvas {
       self.changeLink(data);
     });
 
-    // delete links on double click
     jsPlumb.bind("dblclick", function(conn) {
         jsPlumb.detach(conn);
     });
@@ -210,6 +216,54 @@ export class Canvas {
     });
   }
 
+  registerConnectionEvents(connection: any) {
+    var self = this;
+    // clicking a link adds a wiretap to it
+    connection.bind("click", function(conn) {
+      if (!self.isNetworkRunning()) {
+        var link = self.network.graph.getLinkByID(conn.id);
+        if (!self.hasWiretap(link)) {
+          self.addWiretapOverlay(conn);         
+          (link as any).metadata["wiretap"] = true;
+          (link as any)._channel.addEndPoint(new EndPoint('$wiretap', Direction.OUT));
+        } else {
+          conn.removeOverlay(conn.id);
+          self.removeWiretap(link);
+        }
+      }
+    });
+  }
+
+  addWiretapOverlay(conn: any) {
+    conn.addOverlay(["Custom", {
+      create: function(component) {
+        return $('<div id="wiretap" rel="wiretap" style="background-color: #77aca7; padding: 3px 4px 2px 6px;"><i style="font-size:20px" class="fa fa-user-secret"></i></div>');
+      },
+      location: 0.5,
+      id: conn.id
+    }]);
+  }
+
+  hasWiretap(link) {
+    var endPoints = link._channel.endPoints;
+    for (var endPoint of endPoints) {
+      if (endPoint.id === "$wiretap") {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  removeWiretap(link) {
+    var endPoints = link._channel.endPoints;
+    for (var endPoint of endPoints) {
+      if (endPoint.id === "$wiretap") {
+        link.metadata.wiretap = false;
+        link._channel.removeEndPoint(endPoint);
+      }
+    }
+  }
+
   unregisterEvents() {
     jsPlumb.unbind("connection");
     jsPlumb.unbind("connectionDetached");
@@ -224,13 +278,23 @@ export class Canvas {
   }
 
   runNetwork() {
+    this.configureWiretaps();
+    this.wiretap.clear();
     this.network.start();
+    this.showWiretapPanel = true;
     this.toggleDragging(false);
   }
 
   stopNetwork() {
     this.network.stop();
+    this.showWiretapPanel = false;
     this.toggleDragging(true);
+    this.wiretap.clear();
+    this.network.teardown();
+    this.network.loadComponents().then(() => {
+      this.network.initialize();
+      this.configureWiretaps();
+    });
   }
 
   toggleDragging(canDrag: boolean) {
@@ -255,6 +319,7 @@ export class Canvas {
           });
           this.network.loadComponents().then(() => {
             this.network.initialize();
+            this.configureWiretaps();
           });
         }
       });
@@ -297,14 +362,18 @@ export class Canvas {
         if (!response.wasCancelled) {
           // rename the jsPlumb connection instance to the user chosen name
           var jsPlumbConnection = jsPlumb.getConnections()[jsPlumb.getConnections().length - 1];
-          jsPlumbConnection.id = response.output; 
+          jsPlumbConnection.id = response.output;
+          this.registerConnectionEvents(jsPlumbConnection); 
           this.network.teardown();
           // endpoint UUIDs contain information about the node they're on, so we must split this ou 
           this.network.graph.addLink(response.output, {
             from: { nodeID: sourceEndPointID.split(":")[0], portID: sourceEndPointID.split(":")[1] },
             to: { nodeID: targetEndPointID.split(":")[0], portID: targetEndPointID.split(":")[1] }
           });
-          this.network.loadComponents().then(() => { this.network.initialize(); });
+          this.network.loadComponents().then(() => { 
+            this.network.initialize();
+            this.configureWiretaps();
+          });
         } else {
           // if no ID is provided, remove the connection
           var connections = jsPlumb.getConnections();
@@ -317,16 +386,20 @@ export class Canvas {
         from: { nodeID: sourceEndPointID.split(":")[0], portID: sourceEndPointID.split(":")[1] },
         to: { nodeID: targetEndPointID.split(":")[0], portID: targetEndPointID.split(":")[1] }
       });
-      this.network.loadComponents().then(() => { this.network.initialize(); });
+      this.network.loadComponents().then(() => { 
+        this.network.initialize(); 
+        this.configureWiretaps();
+      });
     }
     // repeated code is necessary, otherwise the link would be added before it gets the ID supplied by the user
   }
 
-  removeLink(linkID: string) {  
+  removeLink(linkID: string) {
     this.network.teardown();
     this.network.graph.removeLink(linkID);
     this.network.loadComponents().then(() => {
       this.network.initialize();
+      this.configureWiretaps();
     });
   }
 
@@ -395,6 +468,19 @@ export class Canvas {
       takenNames.push(node.id);
     });
     return takenNames;
+  }
+
+  /*
+   * the new EndPoint added to the channel is lost when the network state
+   * is changed, so a wiretap property is added to the link metadata for 
+   * permanence. This functions re adds the wiretaps to the channels from
+   * the link properties
+   */
+  configureWiretaps() {
+    this.network.graph.links.forEach(link => {
+      if ((link as any).metadata["wiretap"] && !this.hasWiretap(link))
+        (link as any)._channel.addEndPoint(new EndPoint('$wiretap', Direction.OUT));
+    });
   }
 
 }

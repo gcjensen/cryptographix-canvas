@@ -32,7 +32,7 @@ export class EMVCardSimulatorVM {
   }
 
   attached() {
-    $('#errorPopover').popover({ trigger: "hover" });
+    ($('#errorPopover') as any).popover({ trigger: "hover" });
   }
 
   startComponent() {
