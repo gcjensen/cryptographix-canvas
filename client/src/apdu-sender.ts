@@ -39,17 +39,7 @@ export class APDUSenderVM {
       .setP2(0x00)
       .setData(new ByteArray([0xA0, 0x00, 0x00, 0x01, 0x54, 0x44, 0x42]));
 
-    var gpoAPDU = CommandAPDU
-      .init()
-      .setCLA(0x00)
-      .setINS(0xA4)
-      .setP1(0x04)
-      .setP2(0x00)
-      .setData(new ByteArray([0x83, 0x00]));
-
-    // should call .then() on the promise, but with just the two commands it's seems to work like this
     this.component.sendAPDU(selectAPDU, "powerOn");
-    this.component.sendAPDU(gpoAPDU, "executeAPDU");
   }
 }
 
@@ -69,8 +59,17 @@ export class APDUSender implements Component
     this._toCard = new EndPoint( 'toCard', Direction.INOUT );
 
     this._toCard.onMessage((msg: Message<ByteArray>) => {
-      if (msg.header.method === "powerOn")
+      if (msg.header.method === "powerOn") {
         console.log("Card powered on.");
+        var gpoAPDU = CommandAPDU
+          .init()
+          .setCLA(0x00)
+          .setINS(0xA4)
+          .setP1(0x04)
+          .setP2(0x00)
+          .setData(new ByteArray([0x83, 0x00]));      
+        this.sendAPDU(gpoAPDU, "executeAPDU");
+      }
       else if (msg.header.method === "executeAPDU")
         console.log('Got response from card ' + (msg.payload as any).data.toString(ByteArray.HEX));
     });

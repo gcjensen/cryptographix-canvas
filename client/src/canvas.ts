@@ -45,7 +45,8 @@ export class Canvas {
     // the network object has been bound to canvas in the view
     this.network.loadComponents().then(() => {
       this.network.initialize();
-      this.configureWiretaps();
+      this.loadWiretaps();
+      this.configurePreMessageHook();
     }).then(() => {
       this.network.graph.nodes.forEach(node => {
         this.nodes.push(node);
@@ -129,7 +130,17 @@ export class Canvas {
         paintStyle: { fillStyle: "#77aca7", radius: 4 },
         hoverPaintStyle: { fillStyle: "#77aca7", radius: 8 },
         connectorStyle: { strokeStyle: "#77aca7", lineWidth: 4 },
-        connectorHoverStyle: { lineWidth: 8 }
+        connectorHoverStyle: { lineWidth: 8 },
+        connectorOverlays:[ 
+          [ "Custom", {
+            create: function(component) {
+              return $('<div style="width: 15px; height: 15px; border-radius: 25px; background-color:#77aca7"></div>');
+            },
+            location: 0,
+            id: "arrow",
+            visible: false
+          }] 
+        ]
       });
       self.registerEndpointEvents(endpoint);
     });
@@ -209,7 +220,13 @@ export class Canvas {
         label = id + " - " + self.getDirectionName(Direction, port.direction);
     })
     endpoint.bind("mouseover", function(endpoint) {
-      endpoint.addOverlay(["Label", { label: label, location: [-0.5, -0.5], id: "id" }]);
+      endpoint.addOverlay(["Custom", {
+        create: function(component) {
+          return $('<div style="color: white; background-color: #77aca7; padding: 3px 10px 3px 10px; border-radius: 10px; text-align: center">' + label + '</div>');
+        },
+        location: [-0.5, -0.5],
+        id: "id"
+      }])
     });
     endpoint.bind("mouseout", function(endpoint) {
       endpoint.removeOverlay("id");
@@ -221,7 +238,7 @@ export class Canvas {
     // clicking a link adds a wiretap to it
     connection.bind("click", function(conn) {
       if (!self.isNetworkRunning()) {
-        var link = self.network.graph.getLinkByID(conn.id);
+        var link = self.network.graph.links.get(conn.id);
         if (!self.hasWiretap(link)) {
           self.addWiretapOverlay(conn);         
           (link as any).metadata["wiretap"] = true;
@@ -237,7 +254,7 @@ export class Canvas {
   addWiretapOverlay(conn: any) {
     conn.addOverlay(["Custom", {
       create: function(component) {
-        return $('<div id="wiretap" rel="wiretap" style="background-color: #77aca7; padding: 3px 4px 2px 6px;"><i style="font-size:20px" class="fa fa-user-secret"></i></div>');
+        return $('<div id="wiretap" rel="wiretap" style="color: white; background-color: #77aca7; padding: 3px 4px 2px 6px; border-radius: 10px;"><i style="font-size:20px" class="fa fa-user-secret"></i></div>');
       },
       location: 0.5,
       id: conn.id
@@ -278,7 +295,7 @@ export class Canvas {
   }
 
   runNetwork() {
-    this.configureWiretaps();
+    this.loadWiretaps();
     this.wiretap.clear();
     this.network.start();
     this.showWiretapPanel = true;
@@ -293,7 +310,7 @@ export class Canvas {
     this.network.teardown();
     this.network.loadComponents().then(() => {
       this.network.initialize();
-      this.configureWiretaps();
+      this.loadWiretaps();
     });
   }
 
@@ -319,7 +336,7 @@ export class Canvas {
           });
           this.network.loadComponents().then(() => {
             this.network.initialize();
-            this.configureWiretaps();
+            this.loadWiretaps();
           });
         }
       });
@@ -372,7 +389,7 @@ export class Canvas {
           });
           this.network.loadComponents().then(() => { 
             this.network.initialize();
-            this.configureWiretaps();
+            this.loadWiretaps();
           });
         } else {
           // if no ID is provided, remove the connection
@@ -388,7 +405,7 @@ export class Canvas {
       });
       this.network.loadComponents().then(() => { 
         this.network.initialize(); 
-        this.configureWiretaps();
+        this.loadWiretaps();
       });
     }
     // repeated code is necessary, otherwise the link would be added before it gets the ID supplied by the user
@@ -399,7 +416,7 @@ export class Canvas {
     this.network.graph.removeLink(linkID);
     this.network.loadComponents().then(() => {
       this.network.initialize();
-      this.configureWiretaps();
+      this.loadWiretaps();
     });
   }
 
@@ -476,20 +493,83 @@ export class Canvas {
    * permanence. This functions re adds the wiretaps to the channels from
    * the link properties
    */
-  configureWiretaps() {
+  loadWiretaps() {
     this.network.graph.links.forEach(link => {
       if ((link as any).metadata["wiretap"] && !this.hasWiretap(link)) 
         (link as any)._channel.addEndPoint(new EndPoint('$wiretap', Direction.OUT));
     });
+  }
 
+  configurePreMessageHook() {
     var wiretap = this.wiretap;
+    var jsPlumbInstance = jsPlumb;
+    var network = this.network;
+    var self = this;
+
     Channel.setDeliveryHook((params) : boolean => {
-      wiretap.checkForWiretaps(params.channel, params.message.payload);
-      params.sendMessage();
+      for (var connection of jsPlumbInstance.getConnections()) {
+        var uuids = connection.getUuids();
+        var nodeOne = network.graph.getNodeByID(uuids[0].split(":")[0]);
+        var nodeTwo = network.graph.getNodeByID(uuids[1].split(":")[0]);
+
+        self.checkIfConnectionShouldBeAnimated(connection, nodeOne, nodeTwo, params, wiretap);
+        // check again with the nodes swapped to check for responses along the same link
+        self.checkIfConnectionShouldBeAnimated(connection, nodeTwo, nodeOne, params, wiretap);
+      }
       return true;
     });
   }
 
- 
+  checkIfConnectionShouldBeAnimated(connection, nodeOne, nodeTwo, params, wiretap) {
+    nodeOne.ports.forEach(port => {
+      if (port.endPoint === params.origin) {
+        nodeTwo.ports.forEach(port => {
+          if (port.endPoint === params.destination) {
+            var arrow = connection.getOverlay("arrow");
+            arrow.setVisible(true);
+            this.animateOverlay(connection, "arrow", params.channel, params.message, params.sendMessage, wiretap);
+            return true;
+          }
+        });
+      }
+    });    
+  }
 
+  animateOverlay(connection, id, channel, message, sendMessage, wiretap) {
+    var overlay = connection.getOverlay(id);
+    var timerHandle = null;
+    var wiretapCaptured = false;
+    var start, end, increment;
+
+    if (!message.header.isResponse) {
+      start = 0;
+      end = 1;
+      increment = 0.005;
+    } else {
+      start = 1;
+      end = 0;
+      increment = -0.005;
+    }
+
+    overlay.setLocation(start);
+    connection.repaint();    
+    timerHandle = window.setInterval(function() {
+      overlay.incrementLocation(increment);
+
+      // capture data on wiretap as it passes over it (half way point)
+      if ((increment > 0 && overlay.getLocation() > 0.5 || increment < 0 && overlay.getLocation() < 0.5) && !wiretapCaptured) {
+        wiretap.checkForWiretaps(channel, message.payload);
+        wiretapCaptured = true;
+      }
+
+      if ((increment > 0 && overlay.getLocation() > end) || (increment < 0 && overlay.getLocation() < end)) {
+        overlay.setLocation(end);
+        window.clearInterval(timerHandle);
+        overlay.setVisible(false); 
+        sendMessage();        
+      }
+
+      connection.repaint();
+    }, 5);
+  }
 }
