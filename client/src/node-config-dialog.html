@@ -2,14 +2,10 @@
   <ai-dialog style="width:30%">
     <ai-dialog-body>
       <h2>Configure your ${component.type}</h2>
-      <div class="input-group">
- 
-      </div>
     </ai-dialog-body>
-
     <ai-dialog-footer>
       <button click.trigger="controller.cancel()">Cancel</button>
-      <button click.trigger="controller.ok(linkID)">OK</button>
+      <button click.trigger="controller.ok(config)">OK</button>
     </ai-dialog-footer>
   </ai-dialog>
 </template>

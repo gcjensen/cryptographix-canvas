@@ -6,7 +6,8 @@ import {Router} from 'aurelia-router';
 @autoinject
 export class Login {
  
-  username: string;  password: string;
+  username: string;  
+  password: string;
   router: Router;
 
   attached() {

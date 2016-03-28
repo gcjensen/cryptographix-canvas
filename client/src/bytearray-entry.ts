@@ -1,6 +1,5 @@
 import { customElement, autoinject, bindable, inlineView, child } from 'aurelia-framework';
 import { ByteArray, Component, Kind, EndPoint, Direction, Message, Channel } from 'cryptographix-sim-core';
-import { Wiretap } from './wiretap';
 
 /**
 * Default view for the 'bytearray-entry' component
@@ -14,13 +13,8 @@ export class ByteArrayEntryVM {
   running: boolean = false;
   errors: string;
   errorCount: number = 0;
-  wiretap: Wiretap;
 
   private _component: ByteArrayEntry;
-
-  constructor(wiretap: Wiretap) {
-    this.wiretap = wiretap;
-  }
 
   activate(component: ByteArrayEntry) {
     this._component = component;
@@ -112,8 +106,6 @@ export class ByteArrayEntry implements Component {
   }
 
   public setText(textValue) {
-    var message = new Message<ByteArray>({}, new ByteArray(textValue, this._encoding));
-    this.view.wiretap.checkForWiretaps(this._dataOut, (message.payload as any).byteArray.toString());          
-    this._dataOut.sendMessage(message);
+    this._dataOut.sendMessage(new Message<ByteArray>({}, new ByteArray(textValue, this._encoding)));
   }
 }

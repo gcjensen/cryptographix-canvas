@@ -6,6 +6,7 @@ import { ByteArrayEntry } from './bytearray-entry';
 import { ByteArrayViewer } from './bytearray-viewer';
 import { CryptoBox } from './crypto-box';
 import { EMVCardSimulator } from './emv-card-simulator';
+import { APDUSender } from './apdu-sender';
 import { NetworkConfigDialog } from './network-config-dialog';
 import { DialogService } from 'aurelia-dialog';
 
@@ -78,6 +79,8 @@ export class MyNetworks {
     factory.register( 'ByteArrayViewer', ByteArrayViewer );
     factory.register( 'CryptoBox', CryptoBox );
     factory.register( 'EMVCardSimulator', EMVCardSimulator);
+    factory.register('APDUSender', APDUSender);
+
     graph.nodes.forEach(node => { this.configureNode(node, network.graph) });
     this.networks.push(new Network(factory, graph));
   }

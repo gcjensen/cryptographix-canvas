@@ -7,6 +7,13 @@ export class NodeConfigDialog {
   controller: DialogController;
   component: any;
 
+  // return hardcoded config for now
+  config = {
+      "onlineOnly": true,
+      "offlineDataAuth": 1,
+      "profile": "hello"
+  };
+
   constructor(controller: DialogController) {
     this.controller = controller;
   }

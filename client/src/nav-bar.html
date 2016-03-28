@@ -28,13 +28,13 @@
       <div if.bind="!isAuthenticated" class="navbar-collapse collapse navbar-right">
         <ul class="nav navbar-nav">
           <li class="navbar-links">
-            <a class="${currentRoute === '/' || currentRoute === '/login' ? 'selected' : ''}" href="/#/login">
+            <a style="color: #434949" class="${currentRoute === '/' || currentRoute === '/login' ? 'selected' : ''}" href="/#/login">
               <i class="fa fa-sign-in"></i>
               <span>Login</span>
             </a>
           </li>
           <li class="navbar-links">
-            <a class="${currentRoute === '/signup' ? 'selected' : ''}" href="/#/signup">
+            <a style="color: #434949" class="${currentRoute === '/signup' ? 'selected' : ''}" href="/#/signup">
               <i class="fa fa-user-plus"></i>
               <span>Signup</span>
             </a>
@@ -45,10 +45,19 @@
       <div if.bind="isAuthenticated" class="navbar-collapse collapse navbar-right">
         <ul class="nav navbar-nav">
           <li class="navbar-links">
-            <a href="/#/logout" click.trigger="logout()">
+            <a href="/#/logout" click.trigger="logout()" style="color: #434949">
               <i class="fa fa-sign-out"></i>
               <span>Logout</span>
             </a>
+          </li>
+        </ul>
+      </div>
+
+
+      <div if.bind="isAuthenticated" class="navbar-collapse collapse navbar-right">
+        <ul class="nav navbar-nav">
+          <li class="navbar-links">
+            <a><span style="color: white">${username}</span></a>
           </li>
         </ul>
       </div>

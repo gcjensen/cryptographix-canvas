@@ -138,7 +138,19 @@ var nodes = {
       "vm": "emv-card-simulator"
     },
     "ports": {
-      'in': { "direction": "IN" },
+      'iso7816': { "direction": "INOUT" },
+    }
+  },
+  "apdu-sender": {
+    "id": "apdu-sender",
+    "component": "APDUSender",
+    "metadata": { 
+      "view": { "width": "200px", "height": "130px" },
+      "icon": "terminal",
+      "vm": "apdu-sender"
+    },
+    "ports": {
+      'toCard': { "direction": "OUT" },
     }
   },
 }

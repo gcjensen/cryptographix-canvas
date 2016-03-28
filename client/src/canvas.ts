@@ -2,8 +2,8 @@ import {autoinject, customElement, bindable, containerless, TaskQueue} from 'aur
 import {DialogService} from 'aurelia-dialog';
 import {LinkConfigDialog} from './link-config-dialog';
 import {AddNodeDialog} from './add-node-dialog';
-import {Network, Node, Link, Direction, RunState, EndPoint} from 'cryptographix-sim-core';
-import {Animation} from './animation';
+import { Network, Node, Link, Direction, RunState, EndPoint, Channel } from 'cryptographix-sim-core';
+import { Animation } from './animation';
 import { Wiretap } from './wiretap';
 
 @autoinject
@@ -38,6 +38,7 @@ export class Canvas {
     jsPlumb.detachEveryConnection();
     this.removeGraph(this.network.graph);
     this.nodes = [];
+    this.showWiretapPanel = false;
   }
 
   initialise() {
@@ -89,7 +90,6 @@ export class Canvas {
     }
     this.isDragging = false;
   }
-
 
   configureDomElement(node: Node) {
     let nodeElement = document.getElementById(node.id);
@@ -478,9 +478,18 @@ export class Canvas {
    */
   configureWiretaps() {
     this.network.graph.links.forEach(link => {
-      if ((link as any).metadata["wiretap"] && !this.hasWiretap(link))
+      if ((link as any).metadata["wiretap"] && !this.hasWiretap(link)) 
         (link as any)._channel.addEndPoint(new EndPoint('$wiretap', Direction.OUT));
     });
+
+    var wiretap = this.wiretap;
+    Channel.setDeliveryHook((params) : boolean => {
+      wiretap.checkForWiretaps(params.channel, params.message.payload);
+      params.sendMessage();
+      return true;
+    });
   }
+
+ 
 
 }

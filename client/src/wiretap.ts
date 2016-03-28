@@ -1,3 +1,5 @@
+import { Channel } from 'cryptographix-sim-core';
+
 export class Wiretap {
 
   public data: string = "";
@@ -5,17 +7,16 @@ export class Wiretap {
   // add data to the wiretap
   listen(message: string) {
     if (message !== "") {
-      this.data += "> " + message + "\n";
+      this.data += ">\xa0" + message + "\n";
       this.scrollWiretapPanelToTheBottom();
     }
   }
 
-  checkForWiretaps(endpoint: Endpoint, message: string) {
-    var channels = (endpoint as any)._channels;
-    for (var channel of channels) {
-      for (var endPoint of channel.endPoints) {
-        if (endPoint.id === "$wiretap")
-          this.listen(message);
+  checkForWiretaps(channel: Channel, payload: any) {
+    for (var endPoint of channel.endPoints) {
+      if (endPoint.id === "$wiretap") {
+        var data = payload.data ? payload.data.byteArray.toString() : payload.byteArray.toString();
+        this.listen(data);
       }
     }
   }

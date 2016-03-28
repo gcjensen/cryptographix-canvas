@@ -10,6 +10,7 @@ export class NavBar {
   @bindable router: Router = null;
   subscription: any;
   eventAggregator: EventAggregator;
+  username: string;
 
   // used to control whether 'login' or 'signup' are highlighting in nav
   currentRoute: string;
@@ -26,6 +27,11 @@ export class NavBar {
     this.subscription = this.eventAggregator.subscribe(
       'router:navigation:success',
       this.navigationSuccess.bind(this));
+
+    this.subscription = this.eventAggregator.subscribe('router:navigation:success', value => {
+      this.username = localStorage.getItem("username");
+    });
+
   }
 
   detached() {

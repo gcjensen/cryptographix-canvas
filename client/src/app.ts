@@ -14,7 +14,7 @@ export class App {
         moduleId: 'login',
         nav: false,
         title: 'Login',
-        settings: 'home',
+        settings: 'sign-in',
       },
       {
         route: ['signup'],
@@ -22,7 +22,7 @@ export class App {
         moduleId: 'signup',
         nav: false,
         title: 'Sign up',
-        settings: 'home',
+        settings: 'user-plus',
       },
       {
         route: ['my-networks'],

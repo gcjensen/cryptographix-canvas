@@ -2,8 +2,6 @@ import { customElement, autoinject, bindable, inlineView, child } from 'aurelia-
 import { ByteArray, Component, Kind, KindBuilder,ComponentBuilder, EndPoint, Direction, Message, Channel } from 'cryptographix-sim-core';
 import { CommandAPDU, ResponseAPDU, JSIMSlot, JSIMScriptCard, SlotProtocolHandler } from 'cryptographix-se-core';
 import { JSIMEMVApplet } from './card/jsim-emv-applet';
-import {DialogService} from 'aurelia-dialog';
-import {NodeConfigDialog} from './node-config-dialog';
 
 /**
 * Default view for the 'emv-card-simulator' component
@@ -15,15 +13,10 @@ export class EMVCardSimulatorVM {
   running: boolean = false;
   errors: string;
   errorCount: number = 0;
-  dialogService: DialogService;
 
   private _component: any;
 
-  constructor(dialogService: DialogService) {
-    this.dialogService = dialogService
-  }
-
-  activate(component: any) {
+  activate(component: any) {                                                                        
     this._component = component;
 
     if (component) {
@@ -43,14 +36,6 @@ export class EMVCardSimulatorVM {
     this.running = false;
     this.errors = "";
     this.errorCount = 0;
-  }
-
-  configure() {
-    this.dialogService.open({ viewModel: NodeConfigDialog, model: {type: "EMV Card Simulator"} }).then(response => {
-      if (!response.wasCancelled) {
-
-      }
-    });
   }
 }
 
@@ -79,7 +64,7 @@ export class EMVCardSimulator implements Component
   {
     this._config = config;
 
-    this._apduIn = new EndPoint( 'iso7816', Direction.IN );
+    this._apduIn = new EndPoint( 'iso7816', Direction.INOUT );
 
     this._slot = new JSIMSlot();
 
@@ -133,6 +118,13 @@ export class CardConfig implements Kind {
   onlineOnly: boolean;
   offlineDataAuth: OfflineDataAuthentication;
   profile: string;
+
+  constructor( attributes: {} = {} ) {
+    this.onlineOnly = attributes[ "onlineOnly" ];
+    this.offlineDataAuth = attributes[ "offlineDataAuth" ];
+    this.profile = attributes[ "profile" ];
+  }
+
 }
 
 export enum OfflineDataAuthentication {
