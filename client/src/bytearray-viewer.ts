@@ -8,9 +8,9 @@ export class ByteArrayViewerVM {
   @bindable text: string = '';
   @bindable encoding: string = 'HEX';
 
-  private _component: Component;
-  activate( parent: {} ) {
-    this._component = parent.component;
+  private _component: ByteArrayViewer;
+  activate(parent: { component: Component } ) {
+    this._component = <ByteArrayViewer>parent.component;
 
     if ( this._component ) {
       this._component.bindView( this );
@@ -61,9 +61,9 @@ export class ByteArrayViewer implements Component {
   teardown( ) {
     this._dataIn = null;
   }
- 
+
   start() {}
-  stop() {}  
+  stop() {}
   pause() {}
   resume() {}
 }

@@ -23,7 +23,7 @@ export class EMVCardSimulatorVM {
     this.dialogService = dialogService
   }
 
-  activate(parent: any) {                                                                        
+  activate(parent: any) {
     this._component = parent.component;
     this._node = parent.node;
 
@@ -49,7 +49,7 @@ export class EMVCardSimulatorVM {
   configure() {
 
     var fields = [
-      { 
+      {
         "name": "onlineOnly",
         "vm": "online-only.html",
         "value": false
@@ -65,7 +65,7 @@ export class EMVCardSimulatorVM {
         "value": "default"
       }
     ];
-    
+
     this.dialogService.open({ viewModel: NodeConfigDialog, model: { type: "EMV Card Simulator", fields: fields } }).then(response => {
       if (!response.wasCancelled) {
         var config = {};
@@ -181,6 +181,5 @@ KindBuilder.init( CardConfig, 'EMV Card Simulator Configuration')
 
 ComponentBuilder
   .init( EMVCardSimulator, 'EMV Card Simulator', 'A pure-js simulator for EMV Payment Cards', 'emv-payments' )
-  .config( CardConfig, { onlineOnly: true, offlineDataAuth: OfflineDataAuthentication.NOODA, profile: 'default' } )
+  .config( CardConfig, new CardConfig( { onlineOnly: true, offlineDataAuth: OfflineDataAuthentication.NOODA, profile: 'default' } ) )
   .port( 'iso7816', 'Smartcard Commands', Direction.IN, { protocol: SlotProtocolHandler, required: true } );
-

@@ -16,8 +16,8 @@ export class ByteArrayEntryVM {
 
   private _component: ByteArrayEntry;
 
-  activate(parent: {}) {
-    this._component = parent.component;
+  activate(parent: { component: Component } ) {
+    this._component = <ByteArrayEntry>parent.component;
 
     if (this._component) {
       this._component.bindView(this);
@@ -94,7 +94,7 @@ export class ByteArrayEntry implements Component {
     this.view.startComponent();
   }
 
-  stop() { 
+  stop() {
     this.view.stopComponent();
   }
 
