@@ -1,11 +1,15 @@
 <template>
-  <ai-dialog style="width:30%">
+  <ai-dialog>
     <ai-dialog-body>
-      <h2>Configure your ${component.type}</h2>
+      <h2>Configure your ${params.type}</h2>
+      <hr size=1>
+      <div repeat.for="field of params.fields">
+        <compose view="${field.vm}" model.bind="field.value">
+      </div>
     </ai-dialog-body>
     <ai-dialog-footer>
       <button click.trigger="controller.cancel()">Cancel</button>
-      <button click.trigger="controller.ok(config)">OK</button>
+      <button click.trigger="controller.ok(params)">OK</button>
     </ai-dialog-footer>
   </ai-dialog>
 </template>

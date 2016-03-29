@@ -5,20 +5,13 @@ import {autoinject} from 'aurelia-framework';
 export class NodeConfigDialog {
 
   controller: DialogController;
-  component: any;
-
-  // return hardcoded config for now
-  config = {
-      "onlineOnly": true,
-      "offlineDataAuth": 1,
-      "profile": "hello"
-  };
+  params: any = [];
 
   constructor(controller: DialogController) {
     this.controller = controller;
   }
 
-  activate(component) {
-    this.component = component;
+  activate(params) {
+    this.params = params;
   }
 }

@@ -12,11 +12,11 @@ export class APDUSenderVM {
   bind() {
   }
 
-  activate(component: APDUSender) {
-    this.component = component;
+  activate(parent: any) {                                                                        
+    this.component = parent.component;
 
-    if (component) {
-      component.bindView(this);
+    if (this.component) {
+      this.component.bindView(this);
     }
   }
 
@@ -28,7 +28,7 @@ export class APDUSenderVM {
   @bindable p2: string = '01';
   @bindable data: string = '3030303030303030';
 
-  sendTriggered( ) {
+  sendTriggered() {
     function hex( s ) { return Number.parseInt( s, 16 );  }
 
     var selectAPDU = CommandAPDU

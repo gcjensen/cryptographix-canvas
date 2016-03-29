@@ -1,4 +1,4 @@
-import { Channel } from 'cryptographix-sim-core';
+import { Channel, ByteArray, ByteEncoding } from 'cryptographix-sim-core';
 
 export class Wiretap {
 
@@ -15,7 +15,7 @@ export class Wiretap {
   checkForWiretaps(channel: Channel, payload: any) {
     for (var endPoint of channel.endPoints) {
       if (endPoint.id === "$wiretap") {
-        var data = payload.data ? payload.data.byteArray.toString() : payload.byteArray.toString();
+        var data = payload.data ? payload.data.toString(ByteArray.HEX) : payload.toString(ByteArray.HEX);
         this.listen(data);
       }
     }

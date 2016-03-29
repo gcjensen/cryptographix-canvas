@@ -8,6 +8,6 @@
     <p class="component-name"><i class="fa fa-${node.metadata.icon}"></i></p>
   </div>
 
-  <compose click.trigger="configureComponent()" if.bind="style === 'regular'" style="position: absolute;" model.bind="node.context.instance" id="${node.id}" view-model="${node.metadata.vm}"></compose>
+  <compose if.bind="style === 'regular'" style="position: absolute;" model.bind="{'component': node.context.instance, 'node': node}" id="${node.id}" view-model="${node.metadata.vm}"></compose>
 
 </template>

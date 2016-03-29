@@ -1,7 +1,9 @@
 import { customElement, autoinject, bindable, inlineView, child } from 'aurelia-framework';
-import { ByteArray, Component, Kind, KindBuilder,ComponentBuilder, EndPoint, Direction, Message, Channel } from 'cryptographix-sim-core';
+import { Node, ByteArray, Component, Kind, KindBuilder,ComponentBuilder, EndPoint, Direction, Message, Channel } from 'cryptographix-sim-core';
 import { CommandAPDU, ResponseAPDU, JSIMSlot, JSIMScriptCard, SlotProtocolHandler } from 'cryptographix-se-core';
 import { JSIMEMVApplet } from './card/jsim-emv-applet';
+import { DialogService } from 'aurelia-dialog';
+import { NodeConfigDialog } from './node-config-dialog';
 
 /**
 * Default view for the 'emv-card-simulator' component
@@ -13,14 +15,20 @@ export class EMVCardSimulatorVM {
   running: boolean = false;
   errors: string;
   errorCount: number = 0;
+  dialogService: DialogService;
+  private _component: EMVCardSimulator;
+  private _node: Node;
 
-  private _component: any;
+  constructor(dialogService: DialogService) {
+    this.dialogService = dialogService
+  }
 
-  activate(component: any) {                                                                        
-    this._component = component;
+  activate(parent: any) {                                                                        
+    this._component = parent.component;
+    this._node = parent.node;
 
-    if (component) {
-      component.bindView(this);
+    if (this._component) {
+      this._component.bindView(this);
     }
   }
 
@@ -36,6 +44,38 @@ export class EMVCardSimulatorVM {
     this.running = false;
     this.errors = "";
     this.errorCount = 0;
+  }
+
+  configure() {
+
+    var fields = [
+      { 
+        "name": "onlineOnly",
+        "vm": "online-only.html",
+        "value": false
+      },
+      {
+        "name": "offlineDataAuth",
+        "vm": "offline-data-authentication.html",
+        "value": OfflineDataAuthentication.NOODA
+      },
+      {
+        "name": "profile",
+        "vm": "profile.html",
+        "value": "default"
+      }
+    ];
+    
+    this.dialogService.open({ viewModel: NodeConfigDialog, model: { type: "EMV Card Simulator", fields: fields } }).then(response => {
+      if (!response.wasCancelled) {
+        var config = {};
+        for (var field of fields) {
+          config[field.name] = field.value;
+        }
+        var instance = new (EMVCardSimulator as any).componentInfo.configKind(config);
+        (this._node as any)._initialData = JSON.parse(JSON.stringify(instance));
+      }
+    });
   }
 }
 

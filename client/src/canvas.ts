@@ -1,4 +1,4 @@
-import {autoinject, customElement, bindable, containerless, TaskQueue} from 'aurelia-framework';
+import {autoinject, customElement, bindable, containerless, TaskQueue, BindingEngine} from 'aurelia-framework';
 import {DialogService} from 'aurelia-dialog';
 import {LinkConfigDialog} from './link-config-dialog';
 import {AddNodeDialog} from './add-node-dialog';
@@ -16,15 +16,17 @@ export class Canvas {
   nodes = [];
   taskQueue: TaskQueue;
   dialogService: DialogService;
+  bindingEngine: BindingEngine;
   isDragging = false;
   nodeStyle = "regular";
   newConnectionSource: string;
   wiretap: Wiretap;
   showWiretapPanel: boolean = false;
 
-  constructor(taskQueue: TaskQueue, dialogService: DialogService, wiretap: Wiretap) {
+  constructor(taskQueue: TaskQueue, dialogService: DialogService, bindingEngine: BindingEngine, wiretap: Wiretap) {
     this.taskQueue = taskQueue;
     this.dialogService = dialogService;
+    this.bindingEngine = bindingEngine;
     this.wiretap = wiretap;
   }
 
@@ -207,6 +209,20 @@ export class Canvas {
     jsPlumb.bind("beforeDrop", function(params) { 
       return self.arePortsCompatible(self.newConnectionSource, params.dropEndpoint.getUuid());         
     });
+
+    // reinitialise the network if initialData changes on a node
+    this.network.graph.nodes.forEach(node => {
+      this.bindingEngine.propertyObserver(node, '_initialData')
+        .subscribe(() => this.reinitialiseNetwork());
+    });
+  }
+
+  reinitialiseNetwork() {
+    this.network.teardown();
+    this.network.loadComponents().then(() => {
+      this.network.initialize();
+      this.loadWiretaps();
+    });    
   }
 
   // endpoints can be moused-over to find out their id and direction

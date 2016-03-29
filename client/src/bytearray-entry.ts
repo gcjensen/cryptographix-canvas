@@ -16,11 +16,11 @@ export class ByteArrayEntryVM {
 
   private _component: ByteArrayEntry;
 
-  activate(component: ByteArrayEntry) {
-    this._component = component;
+  activate(parent: {}) {
+    this._component = parent.component;
 
-    if (component) {
-      component.bindView(this);
+    if (this._component) {
+      this._component.bindView(this);
 
       this.encodingChanged(this.encoding);
       this.textChanged(this.text);

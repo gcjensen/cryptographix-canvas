@@ -10,11 +10,11 @@ export class CryptoBoxVM {
   private _component: CryptoBox;
   running: boolean = false;
 
-  activate(component) {
-    this._component = component;
+  activate(parent: any) {                                                                        
+    this._component = parent.component;
 
-    if (component)
-      component.bindView(this);
+    if (this._component)
+      this._component.bindView(this);    
 
     this.algorithm = 'DES-ECB';
     this.op = 'encrypt';

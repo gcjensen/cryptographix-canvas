@@ -9,11 +9,11 @@ export class ByteArrayViewerVM {
   @bindable encoding: string = 'HEX';
 
   private _component: Component;
-  activate( component: ByteArrayViewer ) {
-    this._component = component;
+  activate( parent: {} ) {
+    this._component = parent.component;
 
-    if ( component ) {
-      component.bindView( this );
+    if ( this._component ) {
+      this._component.bindView( this );
     }
   }
 
