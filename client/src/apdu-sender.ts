@@ -86,4 +86,8 @@ export class APDUSender implements Component
     let cmd = new Message<CommandAPDU>( { method: _method }, apdu );
     this._toCard.sendMessage( cmd );
   }
+
+  start() {
+    this.view.sendTriggered();
+  }
 }

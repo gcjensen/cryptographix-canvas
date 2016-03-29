@@ -145,7 +145,7 @@ var nodes = {
     "id": "apdu-sender",
     "component": "APDUSender",
     "metadata": { 
-      "view": { "width": "200px", "height": "130px" },
+      "view": { "width": "130px", "height": "130px" },
       "icon": "terminal",
       "vm": "apdu-sender"
     },

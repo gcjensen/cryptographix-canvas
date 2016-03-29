@@ -248,6 +248,15 @@ body {
   -webkit-user-select: none;
 }
 
+.node-regular > .command-icon {
+  color: #77aca7;
+  font-size: 50px;
+  font-weight: 700;
+  text-align: center; 
+  margin-top: 20px;
+  -webkit-user-select: none;
+}
+
 .node-thumbnail > .component-name {
   font-family: Oswald;
   color: #77aca7;
