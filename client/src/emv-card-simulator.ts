@@ -47,32 +47,9 @@ export class EMVCardSimulatorVM {
   }
 
   configure() {
-
-    var fields = [
-      {
-        "name": "onlineOnly",
-        "vm": "online-only.html",
-        "value": false
-      },
-      {
-        "name": "offlineDataAuth",
-        "vm": "offline-data-authentication.html",
-        "value": OfflineDataAuthentication.NOODA
-      },
-      {
-        "name": "profile",
-        "vm": "profile.html",
-        "value": "default"
-      }
-    ];
-
-    this.dialogService.open({ viewModel: NodeConfigDialog, model: { type: "EMV Card Simulator", fields: fields } }).then(response => {
+    this.dialogService.open({ viewModel: NodeConfigDialog, model: (EMVCardSimulator as any).componentInfo }).then(response => {
       if (!response.wasCancelled) {
-        var config = {};
-        for (var field of fields) {
-          config[field.name] = field.value;
-        }
-        var instance = new (EMVCardSimulator as any).componentInfo.configKind(config);
+        var instance = new (EMVCardSimulator as any).componentInfo.configKind(response.output.defaultConfig);
         (this._node as any)._initialData = JSON.parse(JSON.stringify(instance));
       }
     });

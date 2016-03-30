@@ -557,7 +557,6 @@ export class Canvas {
       this.animationSpeed = 0.02;
     }
     this.animationSpeed += change;
-    console.log(change + " " + this.animationSpeed);
     if (this.animationSpeed < 0.001) this.animationSpeed = 0.001;
     if (this.animationSpeed > 0.02 && change > 0) this.animationSpeed = 1;
   }

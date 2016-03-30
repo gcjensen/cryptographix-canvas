@@ -1,0 +1,6 @@
+<template>
+  <h4 style="margin-top: 20px;">${field.value.description}</h4>
+  <div class="radio-inline" repeat.for="[value, option] of field.value.enumMap">
+    <label><input type="radio" model.bind="value" checked.bind="model.defaultConfig[field.key]">${option}</label>
+  </div>
+</template>
