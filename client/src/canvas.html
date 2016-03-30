@@ -5,6 +5,13 @@
     <node-element repeat.for="node of nodes" node.bind="node" style.bind="nodeStyle"></node-element>
   </div>
 
+  <div if.bind="network.graph.context.runState === 4" class="speed-controls">
+    <div click.trigger="changeSpeed(0.001)" class="triangle-up"></div>
+    <h5 if.bind="animationSpeed < 0.02" style="color: #c7d8d8; font-size: 13px;">Speed: ${animationSpeed.toFixed(3) * 1000}</h5>
+    <h5 if.bind="animationSpeed >= 0.02" style="color: #c7d8d8; font-size: 13px;">No Delay</h5>
+    <div click.trigger="changeSpeed(-0.001)" class="triangle-down"></div>
+  </div>
+
   <!-- 4 is the value of the run state RUNNING -->
   <button if.bind="network.graph.context.runState !== 4" type="button" class="btn btn-circle btn-lg btn-play" click.trigger="runNetwork()"><i class="fa fa-play"></i></button> 
 
