@@ -1,7 +1,7 @@
-import {autoinject, customElement, bindable, containerless, TaskQueue, BindingEngine} from 'aurelia-framework';
-import {DialogService} from 'aurelia-dialog';
-import {LinkConfigDialog} from './link-config-dialog';
-import {AddNodeDialog} from './add-node-dialog';
+import { autoinject, customElement, bindable, containerless, TaskQueue, BindingEngine} from 'aurelia-framework';
+import { DialogService } from 'aurelia-dialog';
+import { LinkConfigDialog } from './config-dialogs/link-config-dialog';
+import { AddNodeDialog } from './config-dialogs/add-node-dialog';
 import { Network, Node, Link, Direction, RunState, EndPoint, Channel } from 'cryptographix-sim-core';
 import { Animation } from './animation';
 import { Wiretap } from './wiretap';

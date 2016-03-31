@@ -1,9 +1,6 @@
 import {DialogController} from 'aurelia-dialog';
 import {autoinject, TaskQueue} from 'aurelia-framework';
 import {Network, Graph, Direction, ComponentFactory, Kind, Node} from 'cryptographix-sim-core';
-import { ByteArrayEntry } from './bytearray-entry';
-import { ByteArrayViewer } from './bytearray-viewer';
-import { CryptoBox } from './crypto-box';
 
 @autoinject
 export class AddNodeDialog {

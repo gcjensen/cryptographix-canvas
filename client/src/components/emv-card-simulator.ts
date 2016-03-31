@@ -3,7 +3,7 @@ import { Node, ByteArray, Component, Kind, KindBuilder,ComponentBuilder, EndPoin
 import { CommandAPDU, ResponseAPDU, JSIMSlot, JSIMScriptCard, SlotProtocolHandler } from 'cryptographix-se-core';
 import { JSIMEMVApplet } from './card/jsim-emv-applet';
 import { DialogService } from 'aurelia-dialog';
-import { NodeConfigDialog } from './node-config-dialog';
+import { NodeConfigDialog } from '../config-dialogs/node-config-dialog';
 
 /**
 * Default view for the 'emv-card-simulator' component
