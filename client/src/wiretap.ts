@@ -5,18 +5,19 @@ export class Wiretap {
   public data: string = "";
 
   // add data to the wiretap
-  listen(message: string) {
+  listen(message: string, isResponse: boolean) {
     if (message !== "") {
-      this.data += ">\xa0" + message + "\n";
+      var symbol = !isResponse ? "" : " (response)";
+      this.data += ">\xa0" + message + symbol + "\n";
       this.scrollWiretapPanelToTheBottom();
     }
   }
 
-  checkForWiretaps(channel: Channel, payload: any) {
+  checkForWiretaps(channel: Channel, message: any) {
     for (var endPoint of channel.endPoints) {
       if (endPoint.id === "$wiretap") {
-        var data = payload.data ? payload.data.toString(ByteArray.HEX) : payload.toString(ByteArray.HEX);
-        this.listen(data);
+        var data = message.payload.data ? message.payload.data.toString(ByteArray.HEX) : message.payload.toString(ByteArray.HEX);
+        this.listen(data, message.header.isResponse);
       }
     }
   }

@@ -3,9 +3,10 @@ jspm_packages
 bower_components
 .idea
 .DS_STORE
-/dist
+client/dist
 build/reports
 coverage
 test/e2e/dist
 client/src/*.js
 client/src/*.js.map
+client/test/e2e/dist

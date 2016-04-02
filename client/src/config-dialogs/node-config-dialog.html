@@ -1,0 +1,17 @@
+<template>
+  <ai-dialog>
+    <ai-dialog-body>
+      <h2>Configure your ${model.name}</h2>
+      <hr size=1>
+      <div repeat.for="field of fields">
+        <compose if.bind="field.value.fieldType.name === 'Boolean'" view="./config-components/boolean-list.html"></compose>
+        <compose if.bind="field.value.fieldType.name === 'Enum'" view="./config-components/enum-list.html"></compose>
+        <compose if.bind="field.value.fieldType.name === 'String'" view="./config-components/text-input.html"></compose>
+      </div>
+    </ai-dialog-body>
+    <ai-dialog-footer>
+      <button click.trigger="controller.cancel()">Cancel</button>
+      <button click.trigger="controller.ok(model)">OK</button>
+    </ai-dialog-footer>
+  </ai-dialog>
+</template>

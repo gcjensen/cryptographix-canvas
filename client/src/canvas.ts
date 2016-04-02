@@ -1,7 +1,7 @@
-import {autoinject, customElement, bindable, containerless, TaskQueue, BindingEngine} from 'aurelia-framework';
-import {DialogService} from 'aurelia-dialog';
-import {LinkConfigDialog} from './link-config-dialog';
-import {AddNodeDialog} from './add-node-dialog';
+import { autoinject, customElement, bindable, containerless, TaskQueue, BindingEngine} from 'aurelia-framework';
+import { DialogService } from 'aurelia-dialog';
+import { LinkConfigDialog } from './config-dialogs/link-config-dialog';
+import { AddNodeDialog } from './config-dialogs/add-node-dialog';
 import { Network, Node, Link, Direction, RunState, EndPoint, Channel } from 'cryptographix-sim-core';
 import { Animation } from './animation';
 import { Wiretap } from './wiretap';
@@ -22,6 +22,7 @@ export class Canvas {
   newConnectionSource: string;
   wiretap: Wiretap;
   showWiretapPanel: boolean = false;
+  animationSpeed: number = 0.01;
 
   constructor(taskQueue: TaskQueue, dialogService: DialogService, bindingEngine: BindingEngine, wiretap: Wiretap) {
     this.taskQueue = taskQueue;
@@ -551,6 +552,15 @@ export class Canvas {
     });    
   }
 
+  changeSpeed(change: number) {
+    if (this.animationSpeed == 1 && change < 0) {
+      this.animationSpeed = 0.02;
+    }
+    this.animationSpeed += change;
+    if (this.animationSpeed < 0.001) this.animationSpeed = 0.001;
+    if (this.animationSpeed > 0.02 && change > 0) this.animationSpeed = 1;
+  }
+
   animateOverlay(connection, id, channel, message, sendMessage, wiretap) {
     var overlay = connection.getOverlay(id);
     var timerHandle = null;
@@ -560,11 +570,11 @@ export class Canvas {
     if (!message.header.isResponse) {
       start = 0;
       end = 1;
-      increment = 0.005;
+      increment = this.animationSpeed;
     } else {
       start = 1;
       end = 0;
-      increment = -0.005;
+      increment = -this.animationSpeed;
     }
 
     overlay.setLocation(start);
@@ -574,7 +584,7 @@ export class Canvas {
 
       // capture data on wiretap as it passes over it (half way point)
       if ((increment > 0 && overlay.getLocation() > 0.5 || increment < 0 && overlay.getLocation() < 0.5) && !wiretapCaptured) {
-        wiretap.checkForWiretaps(channel, message.payload);
+        wiretap.checkForWiretaps(channel, message);
         wiretapCaptured = true;
       }
 

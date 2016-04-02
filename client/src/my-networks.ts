@@ -2,12 +2,12 @@ import {autoinject} from 'aurelia-framework';
 import {HttpClient, json} from 'aurelia-fetch-client';
 import 'fetch';
 import {Network, Graph, Direction, ComponentFactory, Kind, Node, RunState} from 'cryptographix-sim-core';
-import { ByteArrayEntry } from './bytearray-entry';
-import { ByteArrayViewer } from './bytearray-viewer';
-import { CryptoBox } from './crypto-box';
-import { EMVCardSimulator } from './emv-card-simulator';
-import { APDUSender } from './apdu-sender';
-import { NetworkConfigDialog } from './network-config-dialog';
+import { ByteArrayEntry } from './components/bytearray-entry';
+import { ByteArrayViewer } from './components/bytearray-viewer';
+import { CryptoBox } from './components/crypto-box';
+import { EMVCardSimulator } from './components/emv-card-simulator';
+import { APDUSender } from './components/apdu-sender';
+import { NetworkConfigDialog } from './config-dialogs/network-config-dialog';
 import { DialogService } from 'aurelia-dialog';
 
 @autoinject

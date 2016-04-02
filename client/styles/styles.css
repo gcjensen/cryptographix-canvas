@@ -181,6 +181,49 @@ body {
   top: 210px;
 }
 
+.speed-controls {
+  position: absolute;
+  top: 108px;
+  right: 80px;
+}
+
+.arrow-up {
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: -25px;
+  text-align: center;
+  color: #77aca7;
+  cursor: pointer;
+  transition: all 0.1s ease-out;
+  transform-origin: bottom;
+}
+
+.arrow-up:hover {
+  transform: scale(1.2);
+}
+
+.arrow-down {
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: -25px;
+  text-align: center;
+  color: #77aca7;
+  cursor: pointer;
+  transition: all 0.1s ease-out;
+  transform-origin: top;
+}
+
+.arrow-down:hover {
+  transform: scale(1.2);
+}
+
+.speed-label {
+  margin-left: auto; 
+  margin-right: auto; 
+  color: #c7d8d8; 
+  font-size: 13px;
+}
+
 .btn-circle.btn-lg:hover {
   background-color: white;
   color: #77aca7;
