@@ -1,5 +1,5 @@
 import { customElement, autoinject, bindable, inlineView, child } from 'aurelia-framework';
-import { Node, ByteArray, Component, Kind, KindBuilder,ComponentBuilder, EndPoint, Direction, Message, Channel } from 'cryptographix-sim-core';
+import { Node, ByteArray, ComponentConstructor, Component, Kind, KindBuilder,ComponentBuilder, EndPoint, Direction, Message, Channel } from 'cryptographix-sim-core';
 import { CommandAPDU, ResponseAPDU, JSIMSlot, JSIMScriptCard, SlotProtocolHandler } from 'cryptographix-se-core';
 import { JSIMEMVApplet } from './card/jsim-emv-applet';
 import { DialogService } from 'aurelia-dialog';
@@ -47,6 +47,8 @@ export class EMVCardSimulatorVM {
   }
 
   configure() {
+    let x = (<ComponentConstructor>EMVCardSimulator).componentInfo;
+
     this.dialogService.open({ viewModel: NodeConfigDialog, model: (EMVCardSimulator as any).componentInfo }).then(response => {
       if (!response.wasCancelled) {
         var instance = new (EMVCardSimulator as any).componentInfo.configKind(response.output.defaultConfig);

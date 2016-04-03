@@ -16,7 +16,7 @@ export class Wiretap {
   checkForWiretaps(channel: Channel, message: any) {
     for (var endPoint of channel.endPoints) {
       if (endPoint.id === "$wiretap") {
-        var data = message.payload.data ? message.payload.data.toString(ByteArray.HEX) : message.payload.toString(ByteArray.HEX);
+        var data = message.payload && ( message.payload.data ? message.payload.data.toString(ByteArray.HEX) : message.payload.toString(ByteArray.HEX) ); 
         this.listen(data, message.header.isResponse);
       }
     }
