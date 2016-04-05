@@ -25,7 +25,7 @@ To run the app, follow these steps.
 
 4. Browse to [http://localhost:9000](http://localhost:9000). 
 
-In future, the application can then just be started and stopped running the stop and stop scripts.
+In future, the application can be started and stopped by running the respective scripts.
 
   ```shell
   ./start.sh
