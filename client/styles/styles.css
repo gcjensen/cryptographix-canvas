@@ -449,14 +449,6 @@ section.au-enter-active {
   border-radius: 5px;
 }
 
-/*.jsplumb-overlay { 
-  color: white;
-  background-color: #77aca7;
-  padding: 3px 10px 3px 10px; 
-  border-radius: 10px;
-  text-align: center;
-}*/
-
 .dialog {
   width:30%;
 }
@@ -473,15 +465,6 @@ section.au-enter-active {
 
 .dialog-body > .id-input {
   margin-left: 8px; 
-}
-
-.dialog-footer {
-  color: white;
-  background-color: #77aca7 !important;
-}
-
-.dialog-footer > button {
-  color: #77aca7;
 }
 
 .shake {

@@ -74,5 +74,8 @@
         "main": "client/shim.min"
       }
     }
+  },
+  "dependencies": {
+    "jsplumb": "^2.0.6"
   }
 }
