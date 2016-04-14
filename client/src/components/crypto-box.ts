@@ -21,7 +21,7 @@ export class CryptoBoxVM {
   }
 
   attached() {
-    ($('#errorPopover') as any).popover({ trigger: "hover" });
+    ($('[data-toggle="popover"]') as any).popover();   
   }
 
   @bindable

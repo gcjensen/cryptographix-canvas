@@ -28,7 +28,7 @@ export class ByteArrayEntryVM {
   }
 
   attached() {
-    ($('#errorPopover') as any).popover({ trigger: "hover" });
+    ($('[data-toggle="popover"]') as any).popover();   
   }
 
   startComponent() {

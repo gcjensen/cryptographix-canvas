@@ -1,7 +1,6 @@
 <template>
- 
-  <a style="position: absolute; margin-top: -8px; margin-left: -8px" id="errorPopover" class="btn" href="#" data-html=true data-content="${errors}"
-  rel="popover" data-container="body" data-placement="top" data-original-title="Errors (${errorCount})"><span if.bind="errors.length > 0" style="position: absolute; top:0px; right:0px; background-color: red" class="badge">!</span></a>
+
+  <span show.bind="errors.length > 0" class="badge component-error-badge" data-html=true data-content="${errors}" rel="popover" data-container="body" data-placement="top" data-original-title="Errors (${errorCount})" data-toggle="popover">!</span>
 
   <div class="node-regular">
     <textarea value.bind='text' class="form-control text-area" rows="5"></textarea>

@@ -241,7 +241,14 @@ body {
   background-color: white;
   border-radius: 20px;
   transition: width 0.4s, height 0.4s, border-radius 0.4s;
-  /*transition: 0.4s ease-in-out;*/
+}
+
+.component-error-badge {
+  position: absolute; 
+  margin-top: -5px; 
+  margin-left: -5px; 
+  background-color: red !important;
+  cursor: pointer;
 }
 
 .node-thumbnail {

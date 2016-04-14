@@ -136,12 +136,12 @@ export class EMVCardSimulator implements Component
 export class CardConfig implements Kind {
   onlineOnly: boolean;
   offlineDataAuth: OfflineDataAuthentication;
-  profile: string;
+  pin: string;
 
   constructor( attributes: {} = {} ) {
     this.onlineOnly = attributes[ "onlineOnly" ];
     this.offlineDataAuth = attributes[ "offlineDataAuth" ];
-    this.profile = attributes[ "profile" ];
+    this.pin = attributes[ "pin" ];
   }
 
 }
@@ -156,9 +156,9 @@ export enum OfflineDataAuthentication {
 KindBuilder.init( CardConfig, 'EMV Card Simulator Configuration')
   .boolField( 'onlineOnly', 'Online Line')
   .enumField( 'offlineDataAuth', 'Offline Authentication', OfflineDataAuthentication )
-  .stringField( 'profile', 'Card Profile' );
+  .stringField( 'pin', 'Card PIN' );
 
 ComponentBuilder
   .init( EMVCardSimulator, 'EMV Card Simulator', 'A pure-js simulator for EMV Payment Cards', 'emv-payments' )
-  .config( CardConfig, new CardConfig( { onlineOnly: true, offlineDataAuth: OfflineDataAuthentication.NOODA, profile: 'default' } ) )
+  .config( CardConfig, new CardConfig( { onlineOnly: true, offlineDataAuth: OfflineDataAuthentication.NOODA, pin: '0000' } ) )
   .port( 'iso7816', 'Smartcard Commands', Direction.IN, { protocol: SlotProtocolHandler, required: true } );
