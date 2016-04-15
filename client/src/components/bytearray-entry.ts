@@ -1,59 +1,54 @@
-import { customElement, autoinject, bindable, inlineView, child } from 'aurelia-framework';
-import { ByteArray, Component, Kind, EndPoint, Direction, Message, Channel } from 'cryptographix-sim-core';
+import { customElement, autoinject, bindable } from "aurelia-framework";
+import { ByteArray, Component, Kind, EndPoint, Direction, Message } from "cryptographix-sim-core";
 
-/**
-* Default view for the 'bytearray-entry' component
-*/
-@customElement('bytearray-entry')
+@customElement("bytearray-entry")
 @autoinject()
 export class ByteArrayEntryVM {
 
-  @bindable text: string = '';
-  @bindable encoding: string = 'HEX';
-  running: boolean = false;
-  errors: string;
-  errorCount: number = 0;
+  @bindable public text: string = "";
+  @bindable public encoding: string = "HEX";
+  public errors: string;
+  public errorCount: number = 0;
 
-  private _component: ByteArrayEntry;
+  private component: ByteArrayEntry;
+  private running: boolean = false;
 
-  activate(parent: { component: Component } ) {
-    this._component = <ByteArrayEntry>parent.component;
-
-    if (this._component) {
-      this._component.bindView(this);
-
+  public activate(model: { component: Component }): void {
+    this.component = <ByteArrayEntry>model.component;
+    if (this.component) {
+      this.component.bindView(this);
       this.encodingChanged(this.encoding);
       this.textChanged(this.text);
     }
   }
 
-  attached() {
-    ($('[data-toggle="popover"]') as any).popover();   
+  public attached(): void {
+    ($("[data-toggle='popover']") as any).popover();
   }
 
-  startComponent() {
+  public startComponent(): void {
     this.running = true;
     this.textChanged(this.text);
   }
 
-  stopComponent() {
+  public stopComponent(): void {
     this.running = false;
     this.errors = "";
     this.errorCount = 0;
   }
 
-  encodingChanged(newValue: string) {
+  public encodingChanged(newValue: string): void {
     this.encoding = newValue;
-    this._component.setEncoding(ByteArray.stringToEncoding(newValue));
+    this.component.setEncoding(ByteArray.stringToEncoding(newValue));
   }
 
-  textChanged(newValue) {
+  public textChanged(newValue): void {
     if (this.running) {
       try {
         this.errors = "";
         this.errorCount = 0;
-        this._component.setText(newValue);
-      } catch(error) {
+        this.component.setText(newValue);
+      } catch (error) {
         this.errors += "<p>" + error + "</p>";
         this.errorCount++;
       }
@@ -63,43 +58,37 @@ export class ByteArrayEntryVM {
 
 export class ByteArrayEntry implements Component {
 
+  public icon: string = "pencil";
+
   private _config: Kind;
   private _dataOut: EndPoint;
   private _encoding: number;
+  private view: ByteArrayEntryVM;
 
-  icon: string = "pencil";
-  view: any;
-
-  bindView(view: any) {
+  public bindView(view: any) {
     this.view = view;
   }
 
-  initialize(config: Kind): EndPoint[] {
-
+  public initialize(config: Kind): EndPoint[] {
     this._config = config;
-    this._encoding = config['encoding'] || ByteArray.HEX;
-
+    this._encoding = config["encoding"] || ByteArray.HEX;
     // init EndPoints
-    this._dataOut = new EndPoint('out', Direction.OUT);
-
+    this._dataOut = new EndPoint("out", Direction.OUT);
     // and return collection
     return [this._dataOut];
   }
 
-  teardown() {
+  public teardown() {
     this._dataOut = null;
   }
 
-  start() {
+  public start() {
     this.view.startComponent();
   }
 
-  stop() {
+  public stop() {
     this.view.stopComponent();
   }
-
-  pause() { }
-  resume() { }
 
   public setEncoding(encoding: number) {
     this._encoding = encoding;

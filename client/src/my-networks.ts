@@ -1,54 +1,49 @@
-import {autoinject} from 'aurelia-framework';
-import {HttpClient, json} from 'aurelia-fetch-client';
-import 'fetch';
-import {Network, Graph, Direction, ComponentFactory, Kind, Node, RunState} from 'cryptographix-sim-core';
-import { ByteArrayEntry } from './components/bytearray-entry';
-import { ByteArrayViewer } from './components/bytearray-viewer';
-import { CryptoBox } from './components/crypto-box';
-import { EMVCardSimulator } from './components/emv-card-simulator';
-import { APDUSender } from './components/apdu-sender';
-import { NetworkConfigDialog } from './config-dialogs/network-config-dialog';
-import { DialogService } from 'aurelia-dialog';
+import { autoinject } from "aurelia-framework";
+import { HttpClient, json } from "aurelia-fetch-client";
+import { Network, Graph, ComponentFactory, RunState } from "cryptographix-sim-core";
+import { ByteArrayEntry } from "./components/bytearray-entry";
+import { ByteArrayViewer } from "./components/bytearray-viewer";
+import { CryptoBox } from "./components/crypto-box";
+import { EMVCardSimulator } from "./components/emv-card-simulator";
+import { APDUSender } from "./components/apdu-sender";
+import { NetworkConfigDialog } from "./config-dialogs/network-config-dialog";
+import { DialogService } from "aurelia-dialog";
+import "fetch";
 
 @autoinject
 export class MyNetworks {
- 
-  network: Network;
-  networks = [];
-  components: {};
-  label: string;
-  graphSelected: boolean;
-  dialogService: DialogService;
-  fetchCalled: boolean;
-  isSaving: boolean = false;
 
-  // to be passed to the thumbnail so deleteNetwork and loadNetwork can be called
-  self = this;
- 
+  public network: Network;
+  public networks: Array<Network> = [];
+  public label: string = "My Networks";
+  public graphSelected: boolean;
+  // is used to display spinning icon when a network is being saved
+  public isSaving: boolean = false;
+  public self = this;
+
+  private dialogService: DialogService;
+  private fetchCalled: boolean;
+
   constructor(private http: HttpClient, dialogService: DialogService) {
     http.configure(config => {
       config
         .useStandardConfiguration()
-        .withBaseUrl('http://localhost:8080/api/')
+        .withBaseUrl("http://localhost:8080/api/")
         .withDefaults({
           headers: {
-            'authorization': localStorage.getItem('jwt')
+            "authorization": localStorage.getItem("jwt")
           }
-        })
+        });
     });
-    
     this.http = http;
     this.fetchNetworks();
-    this.label = "My Networks";
-    this.dialogService = dialogService
+    this.dialogService = dialogService;
   }
 
-  attached() {
-
+  public attached(): void {
     // offset according to the width and height of the text
-    document.getElementById('page-title').style.marginLeft = "-280px";
-    document.getElementById('page-title').style.marginTop = "-40px";
-
+    document.getElementById("page-title").style.marginLeft = "-280px";
+    document.getElementById("page-title").style.marginTop = "-40px";
     /* 
      * attached and fetchNetworks get called in a different order depending
      * on whether the page is loaded/refreshed, or transitioned to from another
@@ -59,51 +54,47 @@ export class MyNetworks {
     }
   }
 
-  fetchNetworks() {
-    return this.http.fetch('getUserNetworks', {
-        method: 'get'
+  public newNetwork(): void {
+    document.getElementById("newNetworkButton").classList.remove("pulse");
+    this.dialogService.open({ model: this.getTakenNames(), viewModel: NetworkConfigDialog}).then(response => {
+      if (!response.wasCancelled) {
+      let network = { graph: { "id": response.output } };
+        this.configureNetwork(network);
+        this.saveNewGraph(network.graph);
+      }
+    });
+  }
+
+  public deleteNetwork(network: Network): void {
+    this.http.fetch("deleteNetwork", {
+      body: json(network.graph.toObject({}))
+      method: "delete",
     }).then(response => response.json())
       .then(data => {
-        this.fetchCalled = true;
-        if (data.length === 0)
-          document.getElementById("newNetworkButton").classList.add("pulse");
-        for (var network of data)
-          this.configureNetwork(network);
-      }); 
+        this.networks.splice(this.networks.indexOf(network), 1);
+    });
   }
 
-  configureNetwork(network: any) {
-    let graph = new Graph(null, network.graph);
-    let factory = new ComponentFactory();
-    factory.register( 'ByteArrayEntry', ByteArrayEntry );
-    factory.register( 'ByteArrayViewer', ByteArrayViewer );
-    factory.register( 'CryptoBox', CryptoBox );
-    factory.register( 'EMVCardSimulator', EMVCardSimulator);
-    factory.register('APDUSender', APDUSender);
-
-    graph.nodes.forEach(node => { this.configureNode(node, network.graph) });
-    this.networks.push(new Network(factory, graph));
-  }
-
-  loadNetwork(network: Network) {
+  public loadNetwork(network: Network): void {
     this.network = network;
     // the network object is then bound to the canvas custom element in the view
     this.label = this.network.graph.id;
     this.graphSelected = true;
   }
 
-  back() {
-    if (this.network.graph.context.runState === RunState.RUNNING)
+  public back(): void {
+    if (this.network.graph.context.runState === RunState.RUNNING) {
       this.network.stop();
+    }
     this.graphSelected = false;
     this.label = "My Networks";
   }
 
-  save(network: Network) {
+  public save(network: Network): void {
     this.isSaving = true;
-    this.http.fetch('updateNetwork', {
-      method: 'post',
-      body: json(this.network.graph.toObject({}))
+    this.http.fetch("updateNetwork", {
+      body: json(this.network.graph.toObject({})),
+      method: "post"
     }).then(response => response.json())
       .then(data => {
         console.log(data);
@@ -111,58 +102,50 @@ export class MyNetworks {
       });
   }
 
-  saveNewGraph(graph: {}) {
-    this.http.fetch('addNetwork', {
-      method: 'post',
+  /******************** Private Implementation ********************/
+
+  private fetchNetworks(): void {
+    this.http.fetch("getUserNetworks", {
+        method: "get"
+    }).then(response => response.json())
+      .then(data => {
+        this.fetchCalled = true;
+        if (data.length === 0) {
+          document.getElementById("newNetworkButton").classList.add("pulse");
+        }
+        for (let network of data) {
+          this.configureNetwork(network);
+        }
+      });
+  }
+
+  private configureNetwork(network: any): void {
+    let graph = new Graph(null, network.graph);
+    let factory = new ComponentFactory();
+    factory.register( "ByteArrayEntry", ByteArrayEntry );
+    factory.register( "ByteArrayViewer", ByteArrayViewer );
+    factory.register( "CryptoBox", CryptoBox );
+    factory.register( "EMVCardSimulator", EMVCardSimulator);
+    factory.register("APDUSender", APDUSender);
+    this.networks.push(new Network(factory, graph));
+  }
+
+  private saveNewGraph(graph: {}): void {
+    this.http.fetch("addNetwork", {
       body: json(graph)
+      method: "post",
     }).then(response => response.json())
       .then(data => {
-        console.log(data); 
+        console.log(data);
     });
   }
 
-  newNetwork() {
-    document.getElementById("newNetworkButton").classList.remove("pulse");
-    this.dialogService.open({ viewModel: NetworkConfigDialog, model: this.getTakenNames() }).then(response => {
-      if (!response.wasCancelled) {
-        let network = { graph: { "id": response.output } };
-        this.configureNetwork(network);
-        this.saveNewGraph(network.graph);
-      }
-    });
-  }
-
-  deleteNetwork(network: Network) {
-    this.http.fetch('deleteNetwork', {
-      method: 'delete',
-      body: json(network.graph.toObject({}))
-    }).then(response => response.json())
-      .then(data => {
-        this.networks.splice(this.networks.indexOf(network), 1);
-    });
-  }
-
-  configureNode(node: Node, graph: any) {
-    node.metadata["view"] = {
-      x: graph.nodes[node.id].metadata.view.x,
-      y: graph.nodes[node.id].metadata.view.y,
-      width: graph.nodes[node.id].metadata.view.width,
-      height: graph.nodes[node.id].metadata.view.height
-    }
-  }
-
-  getTakenNames() {
-    var takenNames = [];
+  private getTakenNames(): Array<string> {
+    let takenNames = [];
     this.networks.forEach(network => {
       takenNames.push(network.graph.id);
     });
     return takenNames;
   }
-
-  // temporary function to enable testing of graph modifications
-  printGraphObject() {
-    console.log(this.network.graph.toObject({}));
-  }
-
-}	
+}
 

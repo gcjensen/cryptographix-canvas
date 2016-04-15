@@ -1,89 +1,59 @@
-import { customElement, autoinject, bindable, inlineView, child } from 'aurelia-framework';
-import { Node, ByteArray, ComponentConstructor, Component, Kind, KindBuilder,ComponentBuilder, EndPoint, Direction, Message, Channel } from 'cryptographix-sim-core';
-import { CommandAPDU, ResponseAPDU, JSIMSlot, JSIMScriptCard, SlotProtocolHandler } from 'cryptographix-se-core';
-import { JSIMEMVApplet } from './card/jsim-emv-applet';
-import { DialogService } from 'aurelia-dialog';
-import { NodeConfigDialog } from '../config-dialogs/node-config-dialog';
+import { customElement, autoinject } from "aurelia-framework";
+import { Node, ByteArray, Component, Kind, KindBuilder, ComponentBuilder, EndPoint, Direction } from "cryptographix-sim-core";
+import { JSIMSlot, JSIMScriptCard, SlotProtocolHandler } from "cryptographix-se-core";
+import { JSIMEMVApplet } from "./card/jsim-emv-applet";
+import { DialogService } from "aurelia-dialog";
+import { NodeConfigDialog } from "../config-dialogs/node-config-dialog";
 
-/**
-* Default view for the 'emv-card-simulator' component
-*/
-@customElement('emv-card-simulator')
+@customElement("emv-card-simulator")
 @autoinject()
 export class EMVCardSimulatorVM {
 
-  running: boolean = false;
-  errors: string;
-  errorCount: number = 0;
-  dialogService: DialogService;
-  private _component: EMVCardSimulator;
-  private _node: Node;
+  private dialogService: DialogService;
+  private component: EMVCardSimulator;
+  private node: Node;
 
   constructor(dialogService: DialogService) {
-    this.dialogService = dialogService
+    this.dialogService = dialogService;
   }
 
-  activate(parent: any) {
-    this._component = parent.component;
-    this._node = parent.node;
-
-    if (this._component) {
-      this._component.bindView(this);
+  public activate(model: { node: Node, component: Component }): void {
+    this.node = model.node;
+    this.component = <EMVCardSimulator>model.component;
+    if (this.component) {
+      this.component.bindView(this);
     }
   }
 
-  attached() {
-    ($('#errorPopover') as any).popover({ trigger: "hover" });
-  }
-
-  startComponent() {
-    this.running = true;
-  }
-
-  stopComponent() {
-    this.running = false;
-    this.errors = "";
-    this.errorCount = 0;
-  }
-
-  configure() {
-    let x = (<ComponentConstructor>EMVCardSimulator).componentInfo;
-
-    this.dialogService.open({ viewModel: NodeConfigDialog, model: (EMVCardSimulator as any).componentInfo }).then(response => {
+  public configure(): void {
+    this.dialogService.open({ model: (EMVCardSimulator as  any).componentInfo, viewModel: NodeConfigDialog}).then(response => {
       if (!response.wasCancelled) {
-        var instance = new (EMVCardSimulator as any).componentInfo.configKind(response.output.defaultConfig);
-        (this._node as any)._initialData = JSON.parse(JSON.stringify(instance));
+        let instance = new (EMVCardSimulator as any).componentInfo.configKind(response.output.defaultConfig);
+        (this.node as any)._initialData = JSON.parse(JSON.stringify(instance));
       }
     });
   }
 }
 
-export class EMVCardSimulator implements Component
-{
-  _config: {};
+export class EMVCardSimulator implements Component {
 
-  _slot: JSIMSlot;
-  _card: JSIMScriptCard;
-  _cardHandler: SlotProtocolHandler;
-  _apduIn: EndPoint;
+  public icon: string = "credit-card";
 
-  private _node: Node;
-  constructor( node: Node ) {
-    this._node = node;
-  }
+  private _config: {};
+  private _slot: JSIMSlot;
+  private _card: JSIMScriptCard;
+  private _cardHandler: SlotProtocolHandler;
+  private _apduIn: EndPoint;
+  private view: EMVCardSimulatorVM;
 
-  view: EMVCardSimulatorVM;
-  icon: string = "credit-card";
-
-  bindView(view: EMVCardSimulatorVM) {
+  public bindView(view: EMVCardSimulatorVM) {
     this.view = view;
   }
 
-  initialize( config: {} ): EndPoint[]
-  {
+  public initialize( config: {} ): Array<EndPoint> {
     this._config = config;
 
-    this._apduIn = new EndPoint( 'iso7816', Direction.INOUT );
+    this._apduIn = new EndPoint( "iso7816", Direction.INOUT );
 
     this._slot = new JSIMSlot();
 
@@ -93,57 +63,48 @@ export class EMVCardSimulator implements Component
 
     let emvApp = new JSIMEMVApplet();
 
-    this._card.loadApplication( new ByteArray( [ 0xA0, 0x00, 0x00, 0x01, 0x54, 0x44, 0x42 ] ), emvApp )
+    this._card.loadApplication(new ByteArray([0xA0, 0x00, 0x00, 0x01, 0x54, 0x44, 0x42]), emvApp);
 
     return [ this._apduIn ];
   }
 
-  teardown() {
-    if ( this._slot )
+  public teardown() {
+    if (this._slot) {
       this._slot.ejectCard();
-
+    }
     this._slot = null;
-
-//    if ( this._card )
-//      this._card.deleteAllApplications();
-
     this._card = null;
-
     this._apduIn = null;
     this._cardHandler = null;
   }
 
-  start(  )
-  {
+  public start() {
     // The SlotProtocolHandler will process incoming ISO7816 slot-protocol
     // packets, redirecting them to the linked Slot
     this._cardHandler = new SlotProtocolHandler();
-
     this._cardHandler.linkSlot( this._slot, this._apduIn );
   }
 
-  stop()
-  {
+  public stop() {
     // Stop processing slot packets ...
     this._cardHandler.unlinkSlot( );
     this._cardHandler = null;
-
     // reset card
     this._slot.powerOff();
   }
 }
 
 export class CardConfig implements Kind {
-  onlineOnly: boolean;
-  offlineDataAuth: OfflineDataAuthentication;
-  pin: string;
+
+  private onlineOnly: boolean;
+  private offlineDataAuth: OfflineDataAuthentication;
+  private pin: string;
 
   constructor( attributes: {} = {} ) {
     this.onlineOnly = attributes[ "onlineOnly" ];
     this.offlineDataAuth = attributes[ "offlineDataAuth" ];
     this.pin = attributes[ "pin" ];
   }
-
 }
 
 export enum OfflineDataAuthentication {
@@ -153,12 +114,12 @@ export enum OfflineDataAuthentication {
   CDA
 }
 
-KindBuilder.init( CardConfig, 'EMV Card Simulator Configuration')
-  .boolField( 'onlineOnly', 'Online Line')
-  .enumField( 'offlineDataAuth', 'Offline Authentication', OfflineDataAuthentication )
-  .stringField( 'pin', 'Card PIN' );
+KindBuilder.init( CardConfig, "EMV Card Simulator Configuration")
+  .boolField( "onlineOnly", "Online Line")
+  .enumField( "offlineDataAuth", "Offline Authentication", OfflineDataAuthentication )
+  .stringField( "pin", "Card PIN" );
 
 ComponentBuilder
-  .init( EMVCardSimulator, 'EMV Card Simulator', 'A pure-js simulator for EMV Payment Cards', 'emv-payments' )
-  .config( CardConfig, new CardConfig( { onlineOnly: true, offlineDataAuth: OfflineDataAuthentication.NOODA, pin: '0000' } ) )
-  .port( 'iso7816', 'Smartcard Commands', Direction.IN, { protocol: SlotProtocolHandler, required: true } );
+  .init( EMVCardSimulator, "EMV Card Simulator", "A pure-js simulator for EMV Payment Cards", "emv-payments" )
+  .config(CardConfig, new CardConfig({ offlineDataAuth: OfflineDataAuthentication.NOODA, onlineOnly: true, pin: "0000" } ) )
+  .port("iso7816", "Smartcard Commands", Direction.IN, { protocol: SlotProtocolHandler, required: true } );

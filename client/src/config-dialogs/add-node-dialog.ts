@@ -1,14 +1,14 @@
-import {DialogController} from 'aurelia-dialog';
-import {autoinject, TaskQueue} from 'aurelia-framework';
-import {Network, Graph, Direction, ComponentFactory, Kind, Node} from 'cryptographix-sim-core';
+import { DialogController } from 'aurelia-dialog';
+import { autoinject, TaskQueue } from 'aurelia-framework';
+import { Network, Graph, Direction, ComponentFactory, Kind, Node } from 'cryptographix-sim-core';
 
 @autoinject
 export class AddNodeDialog {
 
   controller: DialogController;
   components: {};
-  nodes = [];
-  nodeStyle = "palette";
+  nodes: Array<Node> = [];
+  nodeStyle: string = "palette";
   taskQueue: TaskQueue;
   componentName: string;
   selectedNode: Node;
@@ -20,7 +20,7 @@ export class AddNodeDialog {
     this.taskQueue = taskQueue;
   }
 
-  attached() {
+  attached(): void {
     for (var node in nodes) {
       if (nodes.hasOwnProperty(node)) {
         var newNode = new Node(null, nodes[node]);
@@ -32,11 +32,11 @@ export class AddNodeDialog {
     });
   }
 
-  activate(takenName: Array<string>) {
+  activate(takenName: Array<string>): void {
     this.takenNames = takenName;
   }
 
-  nodeSelected(node: Node) {
+  nodeSelected(node: Node): void {
     // returns all the nodes back to normal so just one is then 'zoomed'
     for (var _node of this.nodes) {
       ($("#" + _node.id) as any).css({
@@ -53,7 +53,7 @@ export class AddNodeDialog {
     this.selectedNode.id = this.nodeID;
   }
 
-  configureDomElements() {
+  configureDomElements(): void {
     let nodeElements = document.getElementsByClassName("node-palette");
     // add the jquery listeners to animate the nodes on hover
     var self = this;

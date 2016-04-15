@@ -254,6 +254,8 @@ body {
 .node-thumbnail {
   display: inline-block;
   background-color: white;
+  height: 50px;
+  width: 50px;
   border: 1.5px solid #77aca7;
   border-radius: 8px;
   margin-left: 5px;

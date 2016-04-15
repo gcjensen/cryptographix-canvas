@@ -1,49 +1,50 @@
-import {bindable} from 'aurelia-framework';
-import {autoinject} from 'aurelia-framework';
-import {Router} from 'aurelia-router';
-import {EventAggregator} from 'aurelia-event-aggregator';
-
+import { bindable } from "aurelia-framework";
+import { autoinject } from "aurelia-framework";
+import { Router } from "aurelia-router";
+import { EventAggregator } from "aurelia-event-aggregator";
 
 @autoinject
 export class NavBar {
 
-  @bindable router: Router = null;
-  subscription: any;
-  eventAggregator: EventAggregator;
-  username: string;
+  @bindable public router: Router = null;
+  public username: string;
+  // used to control whether "login" or "signup" are highlighting in nav
+  public currentRoute: string;
 
-  // used to control whether 'login' or 'signup' are highlighting in nav
-  currentRoute: string;
+  private subscription: any;
+  private eventAggregator: EventAggregator;
 
   constructor(eventAggregator: EventAggregator) {
     this.eventAggregator = eventAggregator;
   }
 
-  navigationSuccess(event) {
-    this.currentRoute = event.instruction.fragment;
-  }
-
-  attached() {
+  public attached(): void {
     this.subscription = this.eventAggregator.subscribe(
-      'router:navigation:success',
+      "router:navigation:success",
       this.navigationSuccess.bind(this));
 
-    this.subscription = this.eventAggregator.subscribe('router:navigation:success', value => {
+    // ensure the username is updated in the navbar
+    this.subscription = this.eventAggregator.subscribe("router:navigation:success", value => {
       this.username = localStorage.getItem("username");
     });
-
   }
 
-  detached() {
+  public detached(): void {
     this.subscription.dispose();
   }
 
-  get isAuthenticated() {
-    return localStorage.getItem('jwt') !== null;
+  get isAuthenticated(): boolean {
+    return localStorage.getItem("jwt") !== null;
   }
 
-  logout() {
-    localStorage.removeItem('jwt');
+  public logout(): void {
+    localStorage.removeItem("jwt");
     this.router.navigate("/login");
+  }
+
+  /******************** Private Implementation ********************/
+
+  private navigationSuccess(event): void {
+    this.currentRoute = event.instruction.fragment;
   }
 }

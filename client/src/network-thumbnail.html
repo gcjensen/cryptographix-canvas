@@ -1,16 +1,15 @@
 <template>
   <require from="node-element"></require>
   <div class="panel panel-default">
-
     <div id="effect" class="effects clearfix" click.trigger="load()">
-        <div class="network-thumbnail">
-          <div class="panel-body">
-            <node-element repeat.for="node of nodes" node.bind="node" style.bind="nodeStyle"></node-element>
-          </div>
-          <div class="overlay">
-              <div class="expand">Open</div>
-          </div>
+      <div class="network-thumbnail">
+        <div class="panel-body">
+          <node-element repeat.for="node of nodes" node.bind="node" style.bind="nodeStyle"></node-element>
         </div>
+        <div class="overlay">
+          <div class="expand">Open</div>
+        </div>
+      </div>
     </div>
     <div class="panel-footer">
       ${network.graph.id}

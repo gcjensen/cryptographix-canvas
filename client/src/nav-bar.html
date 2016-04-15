@@ -6,8 +6,6 @@
           <span style="font-size: 27px; font-weight: 900">CryptoGraphix</span><span style="font-size: 20px; font-weight: 100;"> canvas</span>
         </a>
       </div>
-
-
       <div if.bind="isAuthenticated" class="navbar-collapse collapse navbar-left">
         <ul class="nav navbar-nav">
           <li repeat.for="row of router.navigation" class="navbar-links">
@@ -17,14 +15,12 @@
             </a>
           </li>
         </ul>
-
         <ul class="nav navbar-nav navbar-left">
           <li class="loader" if.bind="router.isNavigating">
             <i class="fa fa-circle-o-notch fa-spin fa-2x"></i>
           </li>
         </ul>
       </div>
-
       <div if.bind="!isAuthenticated" class="navbar-collapse collapse navbar-right">
         <ul class="nav navbar-nav">
           <li class="navbar-links">
@@ -41,7 +37,6 @@
           </li>
         </ul>
       </div>
-
       <div if.bind="isAuthenticated" class="navbar-collapse collapse navbar-right">
         <ul class="nav navbar-nav">
           <li class="navbar-links">
@@ -52,8 +47,6 @@
           </li>
         </ul>
       </div>
-
-
       <div if.bind="isAuthenticated" class="navbar-collapse collapse navbar-right">
         <ul class="nav navbar-nav">
           <li class="navbar-links">
@@ -61,7 +54,6 @@
           </li>
         </ul>
       </div>
-
     </div>
   </nav>
 </template>

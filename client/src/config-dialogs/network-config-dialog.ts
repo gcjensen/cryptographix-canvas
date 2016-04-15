@@ -1,5 +1,5 @@
-import {DialogController} from 'aurelia-dialog';
-import {autoinject} from 'aurelia-framework';
+import { DialogController } from 'aurelia-dialog';
+import { autoinject } from 'aurelia-framework';
 
 @autoinject
 export class NetworkConfigDialog {
@@ -12,11 +12,11 @@ export class NetworkConfigDialog {
     this.controller = controller;
   }
 
-  activate(takenNames: Array<string>) {
+  activate(takenNames: Array<string>): void {
     this.takenNames = takenNames;
   }
 
-  attached() {
+  attached(): void {
     (document.getElementById("okButton") as any).disabled = true;
     // the user can only procede if they've their new network an id, so the add
     // button is only enabled if there is text in the 'id-input' field

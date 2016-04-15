@@ -1,34 +1,37 @@
-import { Channel, ByteArray, ByteEncoding } from 'cryptographix-sim-core';
+import { Channel, ByteArray } from "cryptographix-sim-core";
 
 export class Wiretap {
 
   public data: string = "";
 
-  // add data to the wiretap
-  listen(message: string, isResponse: boolean) {
-    if (message !== "") {
-      var symbol = !isResponse ? "" : " (response)";
-      this.data += ">\xa0" + message + symbol + "\n";
-      this.scrollWiretapPanelToTheBottom();
-    }
-  }
-
-  checkForWiretaps(channel: Channel, message: any) {
-    for (var endPoint of channel.endPoints) {
+  public checkForWiretaps(channel: Channel, message: any): void {
+    for (let endPoint of channel.endPoints) {
       if (endPoint.id === "$wiretap") {
-        var data = message.payload && ( message.payload.data ? message.payload.data.toString(ByteArray.HEX) : message.payload.toString(ByteArray.HEX) ); 
+        // depending on the type of packet, the data is sometimes in 'data', but sometimes not
+        let data = message.payload && (message.payload.data ? message.payload.data.toString(ByteArray.HEX) : message.payload.toString(ByteArray.HEX));
         this.listen(data, message.header.isResponse);
       }
     }
   }
 
-  clear() {
+  public clear(): void {
     this.data = "";
   }
 
-  scrollWiretapPanelToTheBottom() {
-    var wiretapTextarea = document.getElementById("wiretap-textarea");
-    if (wiretapTextarea)
+  /************* Private Implementation *************/
+
+  private listen(message: string, isResponse: boolean): void {
+    if (message !== "") {
+      let symbol = !isResponse ? "" : " (response)";
+      this.data += ">\xa0" + message + symbol + "\n";
+      this.scrollWiretapPanelToTheBottom();
+    }
+  }
+
+  private scrollWiretapPanelToTheBottom(): void {
+    let wiretapTextarea = document.getElementById("wiretap-textarea");
+    if (wiretapTextarea) {
       wiretapTextarea.scrollTop = wiretapTextarea.scrollHeight;
+    }
   }
 }
