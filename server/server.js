@@ -18,12 +18,12 @@ app.use(passport.initialize());
 app.listen(port);
 
 app.use(function (req, res, next) {
-    // Allow requests from localhost
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:9000');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, content-type, authorization');
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    next();
+  // Allow requests from localhost
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:9000');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, content-type, authorization');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  next();
 });
 
 mongoose.connect(database.url); 
@@ -134,9 +134,9 @@ routes.post('/updateNetwork', passport.authenticate('jwt', { session: false}), f
       return res.status(403).send({success: false, msg: 'Sign in to update your project.'});
     } else {    
       Network.findOne({'graph.id': req.body.id }, function(err, network) {
-        if (!network || network.owner !== user.username)
+        if (!network || network.owner !== user.username) {
           return res.json({success: false, msg: 'Project does not exist.'});
-        else {
+        } else {
           network.graph = req.body;
           network.markModified('graph');
           network.save(function(err) {
@@ -157,5 +157,5 @@ routes.delete('/deleteNetwork', function(req, res) {
       return res.json({success: false, msg: 'Error.'});
     }
     res.json({success: true, msg: 'Successful deleted network.'});
-  })
+  });
 });
