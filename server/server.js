@@ -151,11 +151,21 @@ routes.post('/updateNetwork', passport.authenticate('jwt', { session: false}), f
   });
 });
 
-routes.delete('/deleteNetwork', function(req, res) {
-  Network.findOneAndRemove({'graph.id': req.body.id }, function(network, err) {
-    if (err) {
-      return res.json({success: false, msg: 'Error.'});
+routes.delete('/deleteNetwork', passport.authenticate('jwt', { session: false}), function(req, res) {
+  var token = req.headers.authorization.split(' ')[1];
+  var decoded = jwt.decode(token, secret.key);
+  User.findOne({
+    username: decoded.username
+  }, function(err, user) {
+    if (!user) {
+      return res.status(403).send({success: false, msg: 'You must be signed in to delete your networks.'});
+    } else {  
+      Network.findOneAndRemove({ 'owner': user.username, 'graph.id': req.body.id }, function(err, network) {
+        if (err) {
+          return res.json({success: false, msg: err});
+        }
+        res.json({success: true, msg: err});
+      });
     }
-    res.json({success: true, msg: 'Successful deleted network.'});
   });
 });

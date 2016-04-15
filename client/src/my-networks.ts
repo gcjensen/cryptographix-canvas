@@ -67,8 +67,8 @@ export class MyNetworks {
 
   public deleteNetwork(network: Network): void {
     this.http.fetch("deleteNetwork", {
-      body: json(network.graph.toObject({}))
-      method: "delete",
+      body: json(network.graph.toObject({})),
+      method: "delete"
     }).then(response => response.json())
       .then(data => {
         this.networks.splice(this.networks.indexOf(network), 1);
@@ -132,8 +132,8 @@ export class MyNetworks {
 
   private saveNewGraph(graph: {}): void {
     this.http.fetch("addNetwork", {
-      body: json(graph)
-      method: "post",
+      body: json(graph),
+      method: "post"
     }).then(response => response.json())
       .then(data => {
         console.log(data);
