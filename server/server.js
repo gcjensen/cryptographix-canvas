@@ -169,3 +169,70 @@ routes.delete('/deleteNetwork', passport.authenticate('jwt', { session: false}),
     }
   });
 });
+
+routes.get('/getComponents', function(req, res) {
+  return res.status(200).send({
+    "bytearray-entry": {
+      "id": "bytearray-entry",
+      "component": "ByteArrayEntry",
+      "metadata": { 
+        "view": { "width": "200px", "height": "170px" },
+        "icon": "pencil",
+        "vm": "bytearray-entry"
+      },
+      "ports": {
+        'out': { "direction": "OUT" },
+      }
+    },
+    "crypto-box": {
+      "id": "crypto-box",
+      "component": "CryptoBox",
+      "metadata": { 
+        "view": { "width": "190px", "height": "160px" },
+        "icon": "lock",
+        "vm": "crypto-box"
+      },
+      "ports": {
+        'plaintext': { "direction": "IN" },
+        'ciphertext': { "direction": "OUT" },
+        'key': { "direction": "IN" }
+      }
+    },
+    "bytearray-viewer": {
+      "id": "bytearray-viewer",
+      "component": "ByteArrayViewer",
+      "metadata": { 
+        "view": { "width": "200px", "height": "170px" },
+        "icon": "eye",
+        "vm": "bytearray-viewer"
+      },
+      "ports": {
+        'in': { "direction": "IN" },
+      }
+    },
+    "emv-card-simulator": {
+      "id": "emv-card-simulator",
+      "component": "EMVCardSimulator",
+      "metadata": { 
+        "view": { "width": "200px", "height": "130px" },
+        "icon": "credit-card",
+        "vm": "emv-card-simulator"
+      },
+      "ports": {
+        'iso7816': { "direction": "INOUT" },
+      }
+    },
+    "apdu-sender": {
+      "id": "apdu-sender",
+      "component": "APDUSender",
+      "metadata": { 
+        "view": { "width": "130px", "height": "130px" },
+        "icon": "terminal",
+        "vm": "apdu-sender"
+      },
+      "ports": {
+        'toCard': { "direction": "OUT" },
+      }
+    },
+  })
+});

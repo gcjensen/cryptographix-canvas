@@ -1,11 +1,12 @@
-import { DialogController } from 'aurelia-dialog';
-import { autoinject } from 'aurelia-framework';
+import { DialogController } from "aurelia-dialog";
+import { autoinject } from "aurelia-framework";
 
 @autoinject
 export class LinkConfigDialog {
 
-  linkID: string;
-  controller: DialogController;
+  public linkID: string;
+
+  private controller: DialogController;
 
   constructor(controller: DialogController) {
     this.controller = controller;
