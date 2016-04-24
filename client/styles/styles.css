@@ -50,6 +50,15 @@ body {
   font-family: Oswald;
 }
 
+.main-navbar-brand > .cryptographix {
+  font-size: 27px; 
+  font-weight: 900;
+}
+
+.main-navbar-brand > .canvas {
+  font-size: 20px; 
+  font-weight: 100;
+}
 
 .navbar-center {
   position: absolute;
@@ -69,11 +78,22 @@ body {
 
 .navbar-links {
   margin-top: 5px;
-  color: #dadcda !important;
+}
+
+.navbar-links > .logout {
+  color: #434949 !important;
+}
+
+.navbar-links > .logout:hover {
+  color: white !important;
 }
 
 .selected {
   color: white !important;
+}
+
+.username {
+  color: white;
 }
 
 .second-navbar {
@@ -91,7 +111,20 @@ body {
 .navbar-btn {
   margin-top: 7px; 
   background-color: #77aca7; 
-  color:white;
+  color: white;
+}
+
+.navbar-btn:hover {
+  background-color: white; 
+  color: #77aca7 !important;
+  border: 1px solid #77aca7;
+}
+
+
+.saving-spinner {
+  margin-right: 10px !important; 
+  margin-top: 12px !important; 
+  color: #77aca7 !important;
 }
 
 .page-title {
@@ -132,6 +165,11 @@ body {
   background-color: #77aca7 !important;
 }
 
+.panel-footer > .fa-trash-o {
+  float: right; 
+  margin-top: 3px;
+}
+
 .trash-small:hover {
   transform: scale(1.5);
 }
@@ -163,6 +201,10 @@ body {
   height: 40px;
   position: absolute;
   color: white;
+}
+
+.trash > .fa-trash-o {
+  font-size: 45px;
 }
 
 .btn-print {
@@ -233,14 +275,8 @@ body {
   outline: 0 !important;
 }
 
-.node-regular {
-  overflow: auto;
-  background-color: white;
-  height:100%;
-  border: 3px solid #77aca7;
-  background-color: white;
-  border-radius: 20px;
-  transition: width 0.4s, height 0.4s, border-radius 0.4s;
+.dynamic-component {
+  position: absolute;
 }
 
 .component-error-badge {
@@ -281,32 +317,8 @@ body {
   transform: scale(1.3);
 }
 
-.node-regular > .component-name {
-  font-family: Oswald;
-  color: #77aca7;
-  font-size: 40px;
-  text-align: center; 
-  margin-top: 17px;
-  -webkit-user-select: none;
-  transition: font-size 0.4s, margin-top 0.4s;
-}
+.component {
 
-.node-regular > .card-icon {
-  color: #77aca7;
-  font-size: 40px;
-  text-align: center; 
-  margin-top: 30px;
-  margin-left: 35px;
-  -webkit-user-select: none;
-}
-
-.node-regular > .command-icon {
-  color: #77aca7;
-  font-size: 50px;
-  font-weight: 700;
-  text-align: center; 
-  margin-top: 20px;
-  -webkit-user-select: none;
 }
 
 .node-thumbnail > .component-name {
@@ -353,6 +365,44 @@ section {
 .navbar-nav li.loader {
   margin-top: 15px;
   color: white;
+}
+
+.wiretap-panel {
+  opacity: 0.7;
+  width: 100%;
+  margin-bottom: 0px !important;
+}
+
+.wiretap-panel-buttons {
+  color: #a3a5a5; 
+  cursor: pointer;
+}
+
+.wiretap-panel-buttons > .fa-times {
+  margin-left: 10px;
+}
+
+#wiretap-textarea {
+  margin-top: 0px; 
+  margin-left: 0px; 
+  max-width: 100%; 
+  resize: vertical;
+}
+
+.user-form > input {
+  margin-bottom: 10px
+}
+
+.user-form > button {
+  background-color: #77aca7; 
+  color: white; 
+  margin-top: 10px; 
+  margin-bottom: 15px
+}
+
+.user-form > button:hover {
+  background-color: white;
+  color: #77aca7;
 }
 
 /* css for page transition animations */

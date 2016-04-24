@@ -3,7 +3,7 @@
     <div class="container-fluid">
       <div class="navbar-header">
         <a class="navbar-center navbar-brand main-navbar-brand" href="#">
-          <span style="font-size: 27px; font-weight: 900">CryptoGraphix</span><span style="font-size: 20px; font-weight: 100;"> canvas</span>
+          <span class="cryptographix">CryptoGraphix</span><span class="canvas"> canvas</span>
         </a>
       </div>
       <div if.bind="isAuthenticated" class="navbar-collapse collapse navbar-left">
@@ -24,13 +24,13 @@
       <div if.bind="!isAuthenticated" class="navbar-collapse collapse navbar-right">
         <ul class="nav navbar-nav">
           <li class="navbar-links">
-            <a style="color: #434949" class="${currentRoute === '/' || currentRoute === '/login' ? 'selected' : ''}" href="/#/login">
+            <a class="${currentRoute === '/' || currentRoute === '/login' ? 'selected' : ''}" href="/#/login">
               <i class="fa fa-sign-in"></i>
               <span>Login</span>
             </a>
           </li>
           <li class="navbar-links">
-            <a style="color: #434949" class="${currentRoute === '/signup' ? 'selected' : ''}" href="/#/signup">
+            <a class="${currentRoute === '/signup' ? 'selected' : ''}" href="/#/signup">
               <i class="fa fa-user-plus"></i>
               <span>Signup</span>
             </a>
@@ -40,7 +40,7 @@
       <div if.bind="isAuthenticated" class="navbar-collapse collapse navbar-right">
         <ul class="nav navbar-nav">
           <li class="navbar-links">
-            <a href="/#/logout" click.trigger="logout()" style="color: #434949">
+            <a class="logout" href="/#/logout" click.trigger="logout()">
               <i class="fa fa-sign-out"></i>
               <span>Logout</span>
             </a>
@@ -50,7 +50,7 @@
       <div if.bind="isAuthenticated" class="navbar-collapse collapse navbar-right">
         <ul class="nav navbar-nav">
           <li class="navbar-links">
-            <a><span style="color: white">${username}</span></a>
+            <a><span class="username">${username}</span></a>
           </li>
         </ul>
       </div>

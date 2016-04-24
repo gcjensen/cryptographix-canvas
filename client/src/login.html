@@ -1,12 +1,12 @@
 <template>
   <section class="au-animate">
     <div class="wrapper">
-      <form class="form-user">       
+      <form class="user-form form-user">       
         <h2 class="login-title">LOG IN</h2>
-        <input style="margin-bottom: 10px" type="text" value.bind="username" class="form-control" name="username" placeholder="Email Address" required="" autofocus="" />
-        <input style="margin-bottom: 10px" type="password" value.bind="password" class="form-control" name="password" placeholder="Password" required=""/>          
-        <button style="background-color: #77aca7; color: white; margin-top: 10px; margin-bottom: 15px" class="btn btn-lg btn-default btn-block" click.trigger="login()">Login</button>   
-        <a style="margin-bottom: -10px" href="#/signup">Not made an account yet? Click to sign up!</a>
+        <input type="text" value.bind="username" class="form-control" name="username" placeholder="Email Address" required="" autofocus="" />
+        <input type="password" value.bind="password" class="form-control" name="password" placeholder="Password" required=""/>          
+        <button class="btn btn-lg btn-default btn-block" click.trigger="login()">Login</button>   
+        <a href="#/signup">Not made an account yet? Click to sign up!</a>
       </form>
     </div>
   </section>

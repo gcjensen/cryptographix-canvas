@@ -5,5 +5,5 @@
   <div if.bind="style === 'palette'" id="${node.id}" class="node-palette">
     <p class="component-name"><i class="fa fa-${node.metadata.icon}"></i></p>
   </div>
-  <compose if.bind="style === 'regular'" style="position: absolute;" model.bind="{'node': node, 'component': node.context.instance}" id="${node.id}" view-model="components/${node.metadata.vm}"></compose>
+  <compose class="dynamic-component" if.bind="style === 'regular'" model.bind="{'node': node, 'component': node.context.instance}" id="${node.id}" view-model="components/${node.metadata.vm}"></compose>
 </template>

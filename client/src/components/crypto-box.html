@@ -2,10 +2,10 @@
 
   <span show.bind="errors.length > 0" class="badge component-error-badge" data-html=true data-content="${errors}" rel="popover" data-container="body" data-placement="top" data-original-title="Errors (${errorCount})" data-toggle="popover">!</span>
 
-  <div class="node-regular">
-    <p class="component-name"><i class="fa fa-lock"></i></p>
-    <div style="margin-left: 10px" class="buttons">
-      <div class="actions" style="display: block;">
+  <div class="node-regular crypto-box">
+    <p class="icon lock-icon"><i class="fa fa-lock"></i></p>
+    <div class="buttons">
+      <div class="actions">
         <form action="">
         
           <div id="iv-input" show.bind='sizeIV > 0' class="iv-input input-group input-group-sm">
@@ -14,7 +14,7 @@
           </div>
 
           <div class="dropdowns">
-            <div class="dropdown" style="display: inline-block">
+            <div class="dropdown">
               <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                 ${op}
                 <span class="caret"></span>
@@ -25,7 +25,7 @@
               </ul>
             </div>
 
-            <div class="dropdown" style="display: inline-block">
+            <div class="dropdown">
               <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                 ${algorithm}
                 <span class="caret"></span>

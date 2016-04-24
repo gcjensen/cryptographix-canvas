@@ -19,13 +19,13 @@
 
   <button id="addNodeButton" type="button" class="${network.graph.context.runState === 4 ? 'disabled' : ''} btn btn-circle btn-lg btn-add" click.trigger="addNode()"><i class="fa fa-plus"></i></button> 
 
-  <div id="trash" show.bind="isDragging" class="trash"><i style="font-size: 45px" class="fa fa-trash-o"></i></div> 
+  <div id="trash" show.bind="isDragging" class="trash"><i class="fa fa-trash-o"></i></div> 
 
-  <div if.bind="showWiretapPanel" style="opacity: 0.7; width: 100%; margin-bottom: 0px;" class="panel panel-default navbar-fixed-bottom">
+  <div if.bind="showWiretapPanel" class="wiretap-panel panel panel-default navbar-fixed-bottom">
     <div class="panel-heading">
-      <h3 class="panel-title">Wiretaps<span style="color: #a3a5a5; cursor: pointer;" class="text-right pull-right"><i class="fa fa-eraser" click.trigger="wiretap.clear()"></i><i style="margin-left: 10px;" class="fa fa-times" click.trigger="showWiretapPanel = false"></i></span></h3>
+      <h3 class="panel-title">Wiretaps<span class="wiretap-panel-buttons text-right pull-right"><i class="fa fa-eraser" click.trigger="wiretap.clear()"></i><i class="fa fa-times" click.trigger="showWiretapPanel = false"></i></span></h3>
     </div>
-    <textarea id="wiretap-textarea" value.bind="wiretap.data" style="margin-top: 0px; margin-left: 0px; max-width: 100%; resize: vertical;" readonly class="panel-body form-control text-area" rows="4">
+    <textarea id="wiretap-textarea" value.bind="wiretap.data" readonly class="panel-body form-control text-area" rows="4">
     </textarea>
   </div>
 

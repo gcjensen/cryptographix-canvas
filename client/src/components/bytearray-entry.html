@@ -2,12 +2,12 @@
 
   <span show.bind="errors.length > 0" class="badge component-error-badge" data-html=true data-content="${errors}" rel="popover" data-container="body" data-placement="top" data-original-title="Errors (${errorCount})" data-toggle="popover">!</span>
 
-  <div class="node-regular">
+  <div class="node-regular byte-array-component">
     <textarea value.bind='text' class="form-control text-area" rows="5"></textarea>
-    <div style="margin-left: 10px" class="buttons">
-      <div class="actions" style="display: block;">
+    <div class="buttons">
+      <div class="actions">
         <form action="">
-          <div class="dropdown" style="display: inline-block; position: absolute; bottom: 10px">
+          <div class="dropdown">
             <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
               ${encoding}
               <span class="caret"></span>

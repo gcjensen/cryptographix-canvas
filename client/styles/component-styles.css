@@ -1,0 +1,60 @@
+.node-regular {
+  overflow: auto;
+  background-color: white;
+  height:100%;
+  border: 3px solid #77aca7;
+  background-color: white;
+  border-radius: 20px;
+  transition: width 0.4s, height 0.4s, border-radius 0.4s;
+}
+
+.node-regular > .icon {
+  color: #77aca7;
+  font-size: 40px;
+  text-align: center; 
+  -webkit-user-select: none;
+}
+
+.node-regular > .lock-icon {
+  margin-top: 17px;
+}
+
+.node-regular > .card-icon {
+  margin-top: 30px;
+}
+
+.node-regular > .command-icon {
+  font-size: 50px;
+  font-weight: 700;
+  margin-top: 20px;
+}
+
+.node-regular > .buttons {
+  margin-left: 10px
+}
+
+.byte-array-component .dropdown {
+  display: inline-block;
+  position: absolute; 
+  bottom: 10px;
+}
+
+.crypto-box .dropdown {
+  display: inline-block;
+}
+
+.config-icon {
+  position: absolute; 
+  margin-top: -7px; 
+  right: 0px; 
+  margin-right:-7px
+}
+
+.config-icon > .fa-wrench {
+  background-color: #77aca7; 
+  color: white;
+  border-radius: 20px; 
+  padding: 5px 5px 5px 5px; 
+  font-size: 20px; 
+  cursor: pointer
+}
