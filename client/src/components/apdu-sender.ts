@@ -1,6 +1,9 @@
 import { customElement, autoinject } from "aurelia-framework";
 import { CommandAPDU, ResponseAPDU, ISO7816, Slot, SlotProtocolProxy } from "cryptographix-se-core";
 import { Component, Direction, Kind, EndPoint, ByteArray } from "cryptographix-sim-core";
+import { EMV } from './common/EMV';
+
+const AID_EMV_TEST = [0xF0, 0x00, 0x00, 0x17, 0x11, 0x31, 0x12];
 
 @customElement("apdu-sender")
 @autoinject()
@@ -21,18 +24,18 @@ export class APDUSenderVM {
       .then( (atr: ByteArray ) => {
         console.log("Card powered on.");
         let selectAPDU = CommandAPDU.init()
-          .setCLA(0x00)
+          .setCLA(ISO7816.CLA_ISO)
           .setINS(ISO7816.INS_SELECT_FILE)
           .setP1(0x04)
           .setP2(0x00)
-          .setData(new ByteArray([0xA0, 0x00, 0x00, 0x01, 0x54, 0x44, 0x42]));
+          .setData(new ByteArray(AID_EMV_TEST));
         return cardSlot.executeAPDU( selectAPDU );
     })
     .then( (resp: ResponseAPDU ) => {
-      console.log("Got response from card " + resp.data.toString(ByteArray.HEX));
+      console.log("Got SELECT response from card " + resp.data.toString(ByteArray.HEX));
       let gpoAPDU = CommandAPDU.init()
-        .setCLA(0x80)
-        .setINS(0xA8)
+        .setCLA(EMV.CLA_EMV)
+        .setINS(EMV.INS_GET_PROCESSING_OPTIONS)
         .setP1(0x00)
         .setP2(0x00)
         .setData(new ByteArray([0x83, 0x00]));
@@ -40,7 +43,33 @@ export class APDUSenderVM {
         return cardSlot.executeAPDU( gpoAPDU );
     } )
     .then( (resp: ResponseAPDU ) => {
-      console.log("Got response from card " + resp.data.toString(ByteArray.HEX));
+      console.log("Got GPO response from card: " + resp.encodeBytes().toString(ByteArray.HEX));
+
+      // Send VERIFY for PIN 1234
+      // TODO: Get PIN from UX
+      let verifyAPDU = CommandAPDU.init()
+        .setCLA(ISO7816.CLA_ISO)
+        .setINS(ISO7816.INS_VERIFY)
+        .setP1(0x00)
+        .setP2(0x00)
+        .setData(new ByteArray([0x24, 0x12, 0x34, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]));
+
+        return cardSlot.executeAPDU( verifyAPDU );
+    } )
+    .then( (resp: ResponseAPDU ) => {
+      console.log("Got VERIFY response from card: " + resp.encodeBytes().toString(ByteArray.HEX));
+
+      let getdataAPDU = CommandAPDU.init()
+        .setCLA(EMV.CLA_EMV)
+        .setINS(ISO7816.INS_GET_DATA)
+        .setP1(0x9F)
+        .setP2(0x17)
+        .setLe( 5 );
+
+        return cardSlot.executeAPDU( getdataAPDU );
+    } )
+    .then( (resp: ResponseAPDU ) => {
+      console.log("Got GET_DATA response from card: " + resp.encodeBytes().toString(ByteArray.HEX));
     } )
     .catch( err => {
       console.log("Got error " + err );

@@ -131,7 +131,7 @@ export class AppletCore
     // The above checks guarantee that P1P2 reference a valid
     // public record. Convert this to DGI format( SFI, Record ),
     // lookup record and return
-    var rec = this.dataStore.getDGI(  ( ( bP2 - 0x04 ) << 5 ) | bP1 );
+    var rec = this.dataStore.getDGI( ( ( bP2 - 0x04 ) << 5 ) | bP1 );
 
     if ( rec != undefined )
       return ResponseAPDU.init( ISO7816.SW_SUCCESS, rec );
@@ -143,20 +143,44 @@ export class AppletCore
   {
     if ( this._wPTC == 0 )
     {
-      return new ResponseAPDU().setSW( 0x6983 );
+      return ResponseAPDU.init( 0x6983 );
     }
     else if ( !commandData.equals( this._bsPINBlock ) )
     {
       this._wPTC--;
 
-      return new ResponseAPDU().setSW( 0x63C0 + this._wPTC );
+      return ResponseAPDU.init( 0x63C0 + this._wPTC );
     }
     else
     {
       this._wPTC = 3;
 
-      return new ResponseAPDU().setSW( ISO7816.SW_SUCCESS );
+      return ResponseAPDU.init( ISO7816.SW_SUCCESS );
     }
+  }
+
+  doGetData( bP1, bP2, commandData: ByteArray ): ResponseAPDU
+  {
+    let tag = bP1 << 8 | bP2;
+    let val = [];
+
+    switch( tag ) {
+      case EMV.TAG_PTC:
+        val = [ this._wPTC >> 8, this._wPTC & 0xFF ];
+        break;
+
+        case EMV.TAG_ATC:
+          val = [ this._wATC >> 8, this._wATC & 0xFF ];
+          break;
+
+        default:
+          return ResponseAPDU.init( ISO7816.SW_REFERENCED_DATA_NOT_FOUND );
+    }
+
+    let valBytes = new ByteArray( val );
+    return ResponseAPDU.init( ISO7816.SW_SUCCESS,
+      new ByteArray( [ bP1, bP2, val.length ]).concat( valBytes )
+    );
   }
 
   doGenerateAC( bP1: number, bP2: number, commandData: ByteArray ): ResponseAPDU
@@ -224,6 +248,9 @@ export class AppletCore
       case ISO7816.INS_READ_RECORD:
         return this.doReadRecord( bP1, bP2, commandData );
 
+      case ISO7816.INS_GET_DATA:
+        return this.doGetData( bP1, bP2, commandData );
+
       case EMV.INS_GENERATE_AC:
         return this.doGenerateAC( bP1, bP2, commandData );
 
@@ -231,7 +258,7 @@ export class AppletCore
 //        return this.selectApplication( bP1, bP2, commandData );
 
       default:
-        return new ResponseAPDU().setSW( 0x6D00 );
+        return ResponseAPDU.init( 0x6D00 );
     }
   }
 

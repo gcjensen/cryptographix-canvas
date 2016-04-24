@@ -5,6 +5,8 @@ import { JSIMEMVApplet } from "./card/jsim-emv-applet";
 import { DialogService } from "aurelia-dialog";
 import { NodeConfigDialog } from "../config-dialogs/node-config-dialog";
 
+const AID_EMV_TEST = [0xF0, 0x00, 0x00, 0x17, 0x11, 0x31, 0x12];
+
 @customElement("emv-card-simulator")
 @autoinject()
 export class EMVCardSimulatorVM {
@@ -50,7 +52,7 @@ export class EMVCardSimulator implements Component {
     this.view = view;
   }
 
-  public initialize( config: {} ): Array<EndPoint> {
+  public initialize( config: { pin?: string; } ): Array<EndPoint> {
     this._config = config;
 
     this._apduIn = new EndPoint( "iso7816", Direction.INOUT );
@@ -63,7 +65,10 @@ export class EMVCardSimulator implements Component {
 
     let emvApp = new JSIMEMVApplet();
 
-    this._card.loadApplication(new ByteArray([0xA0, 0x00, 0x00, 0x01, 0x54, 0x44, 0x42]), emvApp);
+    // Use AID 'F0....' (sort of private, no need to register)
+    this._card.loadApplication(new ByteArray(AID_EMV_TEST), emvApp);
+
+    emvApp.pin = config.pin || "1234";
 
     return [ this._apduIn ];
   }
