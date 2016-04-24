@@ -13,12 +13,12 @@ export class NodeConfigDialog {
     this.controller = controller;
   }
 
-  public activate(model): void {
+  public activate(model): void { 
     this.model = model;
-    for (let key in this.model.configKind.kindInfo.fields) {
-      if (this.model.configKind.kindInfo.fields.hasOwnProperty(key)) {
+    for (let key in this.model.info.configKind.kindInfo.fields) {
+      if (this.model.info.configKind.kindInfo.fields.hasOwnProperty(key)) {
         // the "fields" can then be looped over in the view
-        this.fields.push({ "key": key, "value": this.model.configKind.kindInfo.fields[key]});
+        this.fields.push({ "key": key, "value": this.model.info.configKind.kindInfo.fields[key]});
       }
     }
   }

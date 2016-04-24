@@ -28,9 +28,10 @@ export class EMVCardSimulatorVM {
   }
 
   public configure(): void {
-    this.dialogService.open({ model: (EMVCardSimulator as  any).componentInfo, viewModel: NodeConfigDialog}).then(response => {
+    let model = { "info": (EMVCardSimulator as any).componentInfo, "data": (this.node as any)._initialData };
+    this.dialogService.open({ model: model, viewModel: NodeConfigDialog}).then(response => {
       if (!response.wasCancelled) {
-        let instance = new (EMVCardSimulator as any).componentInfo.configKind(response.output.defaultConfig);
+        let instance = new (EMVCardSimulator as any).componentInfo.configKind(response.output.data);
         (this.node as any)._initialData = JSON.parse(JSON.stringify(instance));
       }
     });
