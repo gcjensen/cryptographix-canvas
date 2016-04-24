@@ -34,6 +34,21 @@ export class JSIMEMVApplet extends JSIMScriptApplet
   constructor()
   {
     super();
+
+    this.core = new AppletCore( new JSIMDataStore() );
+
+    // Set PIN, EMV uses an ISO-2 PIN Block, 8 bytes (16 hex-digits)
+    // '2' + <L> + <PIN> + 'F' as padding
+    // where:
+    //   <L> is length of PIN as a hex-digit
+    //   'F' padding to fill 16 hex-digits
+    // example:  0x24 12 34 FF FF FF FF FF  for PIN '1234'
+    let pinSize = this.pin.length;
+    let pinBlock = '2' + pinSize.toString(16) + this.pin;
+    while( pinBlock.length < 16 )
+      pinBlock += 'F';
+
+    this.core._bsPINBlock = new ByteArray( pinBlock, ByteArray.HEX );
   }
 
   selectApplication( commandAPDU: CommandAPDU ): Promise<ResponseAPDU>
@@ -41,20 +56,6 @@ export class JSIMEMVApplet extends JSIMScriptApplet
     return new Promise<ResponseAPDU>( (resolve, reject ) => {
       let fci = new ByteArray( "6F3C 8407A0000001544442 A531 500F42616E726973756C2044656269746F 870108 9F120F42616E726973756C2044656269746F 9F110101 5F2D047074656E", ByteArray.HEX );
 
-      this.core = new AppletCore( new JSIMDataStore() );
-
-      // Set PIN, EMV uses an ISO-2 PIN Block, 8 bytes (16 hex-digits)
-      // '2' + <L> + <PIN> + 'F' as padding
-      // where:
-      //   <L> is length of PIN as a hex-digit
-      //   'F' padding to fill 16 hex-digits
-      // example:  0x24 12 34 FF FF FF FF FF  for PIN '1234'
-      let pinSize = this.pin.length;
-      let pinBlock = '2' + pinSize.toString(16) + this.pin;
-      while( pinBlock.length < 16 )
-        pinBlock += 'F';
-
-      this.core._bsPINBlock = new ByteArray( pinBlock, ByteArray.HEX );
 
       resolve( ResponseAPDU.init( ISO7816.SW_SUCCESS, fci ) );
     });
@@ -70,7 +71,7 @@ export class JSIMEMVApplet extends JSIMScriptApplet
 
   deselectAppication()
   {
-    if ( this.core )
-      this.core = undefined;
+    // TOOD: persist state
+    //  this.core.saveState( ).then() ?? ;
   }
 }

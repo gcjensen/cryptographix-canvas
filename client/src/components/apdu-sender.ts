@@ -81,6 +81,18 @@ export class APDUSenderVM {
     } )
     .then( (resp: ResponseAPDU ) => {
       console.log("Got GET_DATA response from card: " + resp.encodeBytes().toString(ByteArray.HEX));
+
+      // Send VERIFY for PIN 1234
+      // TODO: Get PIN from UX
+      let verifyAPDU = CommandAPDU
+        .init(EMV.CLA_EMV,EMV.INS_GENERATE_AC, 0x40, 0x00)
+        .setDescription('GENERATE_AC')
+        .setData(new ByteArray( "00000000 00000000 00000000 00000000 00000000 00000000 00000000 0034", ByteArray.HEX));
+
+        return cardSlot.executeAPDU( verifyAPDU );
+    } )
+    .then( (resp: ResponseAPDU ) => {
+      console.log("Got GENERATE_AC response from card: " + resp.encodeBytes().toString(ByteArray.HEX));
     } )
     .catch( err => {
       console.log("Got error " + err );

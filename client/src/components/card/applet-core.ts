@@ -1,17 +1,32 @@
-import { ByteArray } from 'cryptographix-sim-core';
-import { ByteString, ByteBuffer, TLV, Crypto, Key } from 'cryptographix-se-core';
+import { ByteArray, CryptographicServiceProvider } from 'cryptographix-sim-core';
+import { ByteString, TLV as GPTLV } from 'cryptographix-se-core';
 import { ISO7816, CommandAPDU, ResponseAPDU } from 'cryptographix-se-core';
 import { CardDataStore } from './card-data-store';
 import { EMV } from '../common/EMV';
 
+class TLV {
+  xx: GPTLV;
+
+  constructor( tag: number, contents: ByteArray, type: number ) {
+    let bs = new ByteString( contents );
+    this.xx = new GPTLV( tag, bs, type );
+  }
+
+  static EMV = GPTLV.EMV;
+
+  getTLV(): ByteArray {
+    return this.xx.getTLV().byteArray;
+  }
+
+}
 export class AppletCore
 {
-  oCrypto: Crypto;
+  _cryptoProvider: CryptographicServiceProvider;
   sPAN: string;
   sPANSequence: string;
   static _wATC = 0;
   _wATC: number;
-  _kCardACKey: Key;
+  _kCardACKey: CryptoKey;
   _bsPINBlock: ByteArray;
   _wPTC: number;
 
@@ -20,17 +35,22 @@ export class AppletCore
   constructor( dataStore: CardDataStore )
   {
     this.dataStore = dataStore;
+    this._cryptoProvider = new CryptographicServiceProvider();
 
     this.init();
   }
 
   exchangeAPDU( commandAPDU: CommandAPDU ): Promise<ResponseAPDU>
   {
+    var cmd = commandAPDU;
+
+    var res = this.dispatchEMV( cmd.CLA, cmd.INS, cmd.P1, cmd.P2, cmd.data, cmd.Le );
+
+    if ( res instanceof Promise )
+      return <Promise<ResponseAPDU>>res;
+
     return new Promise<ResponseAPDU>( (resolve, reject ) => {
 
-      var cmd = commandAPDU;
-
-      var res = this.dispatchEMV( cmd.CLA, cmd.INS, cmd.P1, cmd.P2, cmd.data, cmd.Le );
 
       resolve( res );
     });
@@ -38,12 +58,6 @@ export class AppletCore
 
   init()
   {
-    this.oCrypto = new Crypto( );
-
-    let kACMaster: Key = new Key();
-    kACMaster.setType( Key.SECRET );
-    kACMaster.setComponent( Key.DES, new ByteString( "5B 46 E9 3E D3 B9 23 BC AE 02 A7 CE 70 64 B5 C1", ByteString.HEX ) );
-
     // defaults
     this.sPAN = "62 71 55 99 00 00 00 13";
     this.sPANSequence = "00";
@@ -51,65 +65,69 @@ export class AppletCore
     this._bsPINBlock = new ByteArray( "241234FFFFFFFFFF", ByteArray.HEX );
     this._wPTC = 3;
 
-    // Init
-    this._kCardACKey = this.deriveCardKey( kACMaster, this.sPAN, this.sPANSequence );
   }
 
-  private deriveCardKey( kMasterKey, sPAN, sPANSequence )
+  private deriveCardKey( kMasterKey, sPAN, sPANSequence ): Promise<any>
   {
-    var kCardKey = new Key();
-    var baDerivationData, baDerivedKey;
-  //  var sDerivationData;
+    return this._cryptoProvider
+      .importKey( "raw",
+        new ByteArray( "5B 46 E9 3E D3 B9 23 BC AE 02 A7 CE 70 64 B5 C1", ByteArray.HEX ),
+        "DES-ECB", true, [ "encrypt" ] )
+      .then( kACMaster => {
+        let baDerivationData;
 
-  //  if ( sPAN.length & 1 )
-  //    sPAN += sPAN + 'F';
+        baDerivationData = new ByteArray( sPAN + sPANSequence, ByteArray.HEX );
+        baDerivationData = baDerivationData.bytesAt( baDerivationData.length - 8, 8 );
+        baDerivationData = baDerivationData.concat( baDerivationData.clone().not() );
 
-  //  sDerivationData = slice( "00000000000000" + sPAN, -14 )
-  //                  + slice( "00" + sPANSequence, -12 )
-
-    baDerivationData = new ByteString( sPAN + sPANSequence, ByteString.HEX );
-    baDerivationData = baDerivationData.bytes( baDerivationData.length - 8, 8 );
-    baDerivationData = baDerivationData.concat( baDerivationData.not() );
-
-    baDerivedKey = this.oCrypto.encrypt( kMasterKey, Crypto.DES_ECB, baDerivationData );
-
-  //  print( "CardKey:" + baDerivationData.toString() + "=" + baDerivedKey.toString() );
-
-    kCardKey.setType( Key.SECRET );
-    kCardKey.setComponent( Key.DES, baDerivedKey );
-
-    return kCardKey;
+        return this._cryptoProvider.encrypt( "DES-ECB",
+            kACMaster, baDerivationData );
+      } )
+      .then( baDerivedKey => {
+        return this._cryptoProvider
+          .importKey( "raw",
+            baDerivedKey,
+            "DES-ECB", true, [ "encrypt" ] )
+      })
+      .catch( err => {
+        alert( "oops. importKey failed: " + err );
+      } );
   }
 
-  private deriveSessionKey( kCardKey, baUN )
+  private deriveSessionKey( kCardKey, baUN ): Promise<CryptoKey>
   {
-    var kSessionKey = new Key();
-    var derivedKey; //: ByteArray;
-    var derivationData = new ByteArray();
+    return this.deriveCardKey( null, this.sPAN, this.sPANSequence )
+      .then( kCardKey => {
+        var derivationData = new ByteArray();
 
-    derivationData.addByte( this._wATC >> 8 ); derivationData.addByte( this._wATC & 0xFF );
-    derivationData.addByte( 0xF0 );            derivationData.addByte( 0 );
-    derivationData.concat( baUN );
+        derivationData.addByte( this._wATC >> 8 ); derivationData.addByte( this._wATC & 0xFF );
+        derivationData.addByte( 0xF0 );            derivationData.addByte( 0 );
+        derivationData.concat( baUN );
 
-    derivationData.addByte( this._wATC >> 8 ); derivationData.addByte( this._wATC & 0xFF );
-    derivationData.addByte( 0x0F );            derivationData.addByte( 0 );
-    derivationData.concat( baUN );
+        derivationData.addByte( this._wATC >> 8 ); derivationData.addByte( this._wATC & 0xFF );
+        derivationData.addByte( 0x0F );            derivationData.addByte( 0 );
+        derivationData.concat( baUN );
 
-    derivedKey = this.oCrypto.encrypt( kCardKey, Crypto.DES_ECB, new ByteString( derivationData ) );
-  //  print( "SessionKey:" + bbDerivationData.toString() + '=' + baDerivedKey.toString() );
-    kSessionKey.setType( Key.SECRET );
-    kSessionKey.setComponent( Key.DES, derivedKey );
-
-    return kSessionKey;
+        return this._cryptoProvider.encrypt( "DES-ECB",
+            kCardKey, derivationData );
+      } )
+      .then( derivedKey => {
+        return this._cryptoProvider
+          .importKey( "raw",
+            derivedKey,
+            "DES-ECB", true, [ "encrypt" ] )
+      });
   }
 
-  private computeApplicationCryptogram( baUN, baDataToSign )
+  private computeApplicationCryptogram( baUN, baDataToSign: ByteArray ): Promise<ByteArray>
   {
-    var kSessionACKey = this.deriveSessionKey( this._kCardACKey, baUN );
-    var baPaddedData = baDataToSign.pad( Crypto.ISO9797_METHOD_2 );
+    return this.deriveSessionKey( null, baUN )
+      .then( sessionKey => {
 
-  //  print( "CryptoToSign: " + baPaddedData.toString() );
-    return this.oCrypto.sign( kSessionACKey, Crypto.DES_MAC_EMV, baPaddedData );
+        //  var paddedData = baDataToSign.pad( Crypto.ISO9797_METHOD_2 );
+        return this._cryptoProvider.encrypt( "DES-ECB",
+          sessionKey, baDataToSign.bytesAt( 0, 8 ));
+      });
   }
 
   doGetProcessingOptions( bP1: number, bP2: number, commandData: ByteArray ): ResponseAPDU
@@ -183,7 +201,7 @@ export class AppletCore
     );
   }
 
-  doGenerateAC( bP1: number, bP2: number, commandData: ByteArray ): ResponseAPDU
+  doGenerateAC( bP1: number, bP2: number, commandData: ByteArray ): Promise<ResponseAPDU>
   {
     // Response: 9F270100
     //           9F36020000
@@ -191,51 +209,53 @@ export class AppletCore
     //           9F26080000000000000000
     var bCID = EMV.CID_ARQC;  // bP1
   //  var bCID = EMV.CID_AAC;  // bP1
-    var baIAPD = new ByteString( "0FA001A00800000000000000000000000F000000000000000000000000000000", ByteString.HEX );
-  //GAC1  var baIAPD = new ByteString( "0FA001A83000000000000000000000000F010000000000000000000000000000", HEX );
-  //GAC2  var baIAPD = new ByteString( "0FA001203000000000000000000000000F010000000000000000000000000000", HEX );
-    var bbResponse;
-    var tlvTemp, baTemp, bbTemp;
+    var baIAPD = new ByteArray( "0FA001A00800000000000000000000000F000000000000000000000000000000", ByteArray.HEX );
+  //GAC1  var baIAPD = new ByteArray( "0FA001A83000000000000000000000000F010000000000000000000000000000", HEX );
+  //GAC2  var baIAPD = new ByteArray( "0FA001203000000000000000000000000F010000000000000000000000000000", HEX );
+    let bbTemp = new ByteArray();
 
-    // CDOL1 = 9F0206 9F0306 9F1A02 9505 5F2A02 9A03 9C01 9F3704
-    bbTemp = new ByteBuffer( commandData.viewAt( 0, 29 ) );
-
-    // Append  8202 - fixed in 1501
-    bbTemp.append( new ByteString( this.dataStore.getDGI( 0x1501 ).viewAt( 4, 1 ) ) );
-
-    // Append  9F3602
-    bbTemp.append( this._wATC >> 8 );
-    bbTemp.append( this._wATC & 0xFF );
-
-    // Append  IAP
-    bbTemp.append( baIAPD );
+    bbTemp
+      // CDOL1 = 9F0206 9F0306 9F1A02 9505 5F2A02 9A03 9C01 9F3704
+      .concat( commandData.viewAt( 0, 29 ) )
+      // Append  8202 - fixed in 1501
+      .concat( new ByteArray( this.dataStore.getDGI( 0x1501 ).viewAt( 4, 1 ) ) )
+      // Append  9F3602
+      .addByte( this._wATC >> 8 )
+      .addByte( this._wATC & 0xFF )
+      // Append  IAP
+      .concat( baIAPD );
 
     // UN = 25..28
-    var baCryptogram = this.computeApplicationCryptogram( commandData.viewAt( 25, 4 ), bbTemp.toByteString() )
-  //  print( "AC=" + baCryptogram.toString() );
-    bbResponse = new ByteBuffer();
+    return this.computeApplicationCryptogram( commandData.viewAt( 25, 4 ), bbTemp )
+      .then( baCryptogram => {
+        //  print( "AC=" + baCryptogram.toString() );
+        let bbResponse = new ByteArray();
 
-    tlvTemp = new TLV( EMV.TAG_CRYPTOGRAM_INFORMATION_DATA, new ByteString( bCID.toString( 16 ), ByteString.HEX ), TLV.EMV );
-    bbResponse.append( tlvTemp.getTLV() );
+        let tlvTemp: TLV;
 
-    bbTemp = new ByteBuffer();
-    bbTemp.append( this._wATC >> 8 );
-    bbTemp.append( this._wATC & 0xFF );
-    tlvTemp = new TLV( EMV.TAG_ATC, bbTemp.toByteString(), TLV.EMV );
-    bbResponse.append( tlvTemp.getTLV() );
+        tlvTemp = new TLV( EMV.TAG_CRYPTOGRAM_INFORMATION_DATA, new ByteArray( bCID.toString( 16 ), ByteArray.HEX ), TLV.EMV );
+        bbResponse.concat( tlvTemp.getTLV() );
 
-    tlvTemp = new TLV( EMV.TAG_ISSUER_APPLICATION_DATA, baIAPD, TLV.EMV );
-    bbResponse.append( tlvTemp.getTLV() );
+        bbTemp = new ByteArray( )
+          .addByte( this._wATC >> 8 )
+          .addByte( this._wATC & 0xFF )
 
-    tlvTemp = new TLV( EMV.TAG_APPLICATION_CRYPTOGRAM, baCryptogram, TLV.EMV );
-    bbResponse.append( tlvTemp.getTLV() );
+        tlvTemp = new TLV( EMV.TAG_ATC, bbTemp, TLV.EMV );
+        bbResponse.concat( tlvTemp.getTLV() );
 
-    tlvTemp = new TLV( EMV.TAG_RESPONSE_FORMAT2_TEMPLATE, bbResponse.toByteString(), TLV.EMV );
+        tlvTemp = new TLV( EMV.TAG_ISSUER_APPLICATION_DATA, baIAPD, TLV.EMV );
+        bbResponse.concat( tlvTemp.getTLV() );
 
-    return ResponseAPDU.init( ISO7816.SW_SUCCESS, tlvTemp.getTLV() );
+        tlvTemp = new TLV( EMV.TAG_APPLICATION_CRYPTOGRAM, baCryptogram, TLV.EMV );
+        bbResponse.concat( tlvTemp.getTLV() );
+
+        tlvTemp = new TLV( EMV.TAG_RESPONSE_FORMAT2_TEMPLATE, bbResponse, TLV.EMV );
+
+        return Promise.resolve<ResponseAPDU>( ResponseAPDU.init( ISO7816.SW_SUCCESS, tlvTemp.getTLV() ) );
+      } );
   }
 
-  dispatchEMV( bCLA, bINS, bP1, bP2, commandData, wLe ): ResponseAPDU
+  dispatchEMV( bCLA, bINS, bP1, bP2, commandData, wLe ): ResponseAPDU | Promise<ResponseAPDU>
   {
     switch( bINS )
     {
@@ -312,7 +332,7 @@ export class AppletCore
                       "0000000000000000000000000000000000000000000000000000000000" );
   if ( emvApplet.getSW12() != ISO7816.SW_SUCCESS )
     print( "Failed GAC: SW=" + emvApplet.getSW12().toString( 16 ) );
-  else if ( !emvApplet.getAPDUResponseData().equals( new ByteString( "77 37 9F 27 01 40 9F 36 02 00 01 9F 10 20 0F A0 01 90 08 00 00 00 00 00 00 00 00 00 00 00 0F 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 9F 26 08 67 E4 7E BD 48 2A 54 29", HEX ) ) )
+  else if ( !emvApplet.getAPDUResponseData().equals( new ByteArray( "77 37 9F 27 01 40 9F 36 02 00 01 9F 10 20 0F A0 01 90 08 00 00 00 00 00 00 00 00 00 00 00 0F 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 9F 26 08 67 E4 7E BD 48 2A 54 29", HEX ) ) )
     print( "Failed GAC" );
   else
   {
