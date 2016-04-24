@@ -1,5 +1,5 @@
 <template>
   <h4 style="margin-top: 20px;">${field.value.description}</h4>
-  <label><input type="radio" model.bind="true" checked.bind="model.defaultConfig[field.key]">&nbsp;&nbsp;Yes&nbsp;</label>
-  <label><input type="radio" model.bind="false" checked.bind="model.defaultConfig[field.key]">&nbsp;&nbsp;No&nbsp;</label>
+  <label><input type="radio" model.bind="true" checked.bind="model.data[field.key]">&nbsp;&nbsp;Yes&nbsp;</label>
+  <label><input type="radio" model.bind="false" checked.bind="model.data[field.key]">&nbsp;&nbsp;No&nbsp;</label>
 </template>

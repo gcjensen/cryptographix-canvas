@@ -26,7 +26,6 @@ export class NetworkThumbnail {
     }
     // the network object has been bound to canvas in the view
     this.network.loadComponents().then(() => {
-      this.network.initialize();
       this.network.graph.nodes.forEach(node => {
         this.nodes.push(node);
       });

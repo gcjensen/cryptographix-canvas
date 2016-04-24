@@ -1,4 +1,5 @@
 <template>
+  <span show.bind="errorCount > 0" class="badge component-error-badge" data-html=true data-content="${errors}" rel="popover" data-container="body" data-placement="top" data-original-title="Errors (${errorCount})" data-toggle="popover">!</span>
   <div class="node-regular">
     <p class="icon command-icon"><i class="fa fa-terminal"></i></p>
   </div>

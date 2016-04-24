@@ -9,7 +9,15 @@ const AID_EMV_TEST = [0xF0, 0x00, 0x00, 0x17, 0x11, 0x31, 0x12];
 @autoinject()
 export class APDUSenderVM {
 
+  public errors: string;
+  public errorCount: number = 0;
+
   private component: APDUSender;
+
+
+  public attached(): void {
+    ($("[data-toggle='popover']") as any).popover();
+  }
 
   public activate(model: { component: Component }): void {
     this.component = <APDUSender>model.component;
@@ -60,10 +68,16 @@ export class APDUSenderVM {
 
       let getdataAPDU = CommandAPDU
         .init( EMV.CLA_EMV, ISO7816.INS_GET_DATA, 0x9F, 0x17 )
-        .setDescription('GET DATA (PTC)')
-        .setLe( 5 );
+        .setDescription('GET DATA (PTC)');
 
-        return cardSlot.executeAPDU( getdataAPDU );
+      if (resp.SW == ISO7816.SW_SUCCESS ) {
+        this.errorCount = 0;
+      } else {
+        this.errors = "PIN incorrect.";
+        this.errorCount++;
+      }
+
+      return cardSlot.executeAPDU( getdataAPDU );
     } )
     .then( (resp: ResponseAPDU ) => {
       console.log("Got GET_DATA response from card: " + resp.encodeBytes().toString(ByteArray.HEX));
