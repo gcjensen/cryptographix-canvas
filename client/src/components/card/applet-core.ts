@@ -143,7 +143,7 @@ export class AppletCore
   {
     if ( this._wPTC == 0 )
     {
-      return ResponseAPDU.init( 0x6983 );
+      return ResponseAPDU.init( ISO7816.SW_FILE_INVALID );
     }
     else if ( !commandData.equals( this._bsPINBlock ) )
     {

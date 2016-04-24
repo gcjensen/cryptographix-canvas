@@ -24,14 +24,19 @@ export class Wiretap {
         let payload = message.payload;
         let data = null;
 
-        if ( payload && isKind( message.payload ) ) {
-          data = <Kind>(message.payload).encodeBytes().toString(ByteArray.HEX);
-        }
-        else if (payload instanceof ByteArray) {
-          data = payload.toString(ByteArray.HEX);
-        }
-        else if ( payload ) {
-          data = payload.toString();
+        if ( payload ) {
+          if ( payload instanceof ByteArray ) {
+            data = payload.toString(ByteArray.HEX);
+          }
+          else if ( payload.toString instanceof Function ) {
+            data = payload.toString();
+          }
+          else if ( isKind( message.payload ) ) {
+            data = <Kind>(message.payload).encodeBytes().toString(ByteArray.HEX);
+          }
+          else {
+            data = payload.toString();
+          }
         }
 
         // depending on the type of packet, the data is sometimes in 'data', but sometimes not

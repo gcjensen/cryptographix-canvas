@@ -23,21 +23,22 @@ export class APDUSenderVM {
     cardSlot.powerOn()
       .then( (atr: ByteArray ) => {
         console.log("Card powered on.");
+
         let selectAPDU = CommandAPDU.init()
           .setCLA(ISO7816.CLA_ISO)
           .setINS(ISO7816.INS_SELECT_FILE)
           .setP1(0x04)
           .setP2(0x00)
+          .setDescription('SELECT FILE (AID)')
           .setData(new ByteArray(AID_EMV_TEST));
+
         return cardSlot.executeAPDU( selectAPDU );
     })
     .then( (resp: ResponseAPDU ) => {
       console.log("Got SELECT response from card " + resp.data.toString(ByteArray.HEX));
-      let gpoAPDU = CommandAPDU.init()
-        .setCLA(EMV.CLA_EMV)
-        .setINS(EMV.INS_GET_PROCESSING_OPTIONS)
-        .setP1(0x00)
-        .setP2(0x00)
+
+      let gpoAPDU = CommandAPDU.init(EMV.CLA_EMV, EMV.INS_GET_PROCESSING_OPTIONS, 0x00, 0x00)
+        .setDescription('GET PROCESSING OPTIONS')
         .setData(new ByteArray([0x83, 0x00]));
 
         return cardSlot.executeAPDU( gpoAPDU );
@@ -47,11 +48,9 @@ export class APDUSenderVM {
 
       // Send VERIFY for PIN 1234
       // TODO: Get PIN from UX
-      let verifyAPDU = CommandAPDU.init()
-        .setCLA(ISO7816.CLA_ISO)
-        .setINS(ISO7816.INS_VERIFY)
-        .setP1(0x00)
-        .setP2(0x00)
+      let verifyAPDU = CommandAPDU
+        .init(ISO7816.CLA_ISO,ISO7816.INS_VERIFY, 0x00, 0x00)
+        .setDescription('VERIFY PIN (PLAIN)')
         .setData(new ByteArray([0x24, 0x12, 0x34, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]));
 
         return cardSlot.executeAPDU( verifyAPDU );
@@ -59,11 +58,9 @@ export class APDUSenderVM {
     .then( (resp: ResponseAPDU ) => {
       console.log("Got VERIFY response from card: " + resp.encodeBytes().toString(ByteArray.HEX));
 
-      let getdataAPDU = CommandAPDU.init()
-        .setCLA(EMV.CLA_EMV)
-        .setINS(ISO7816.INS_GET_DATA)
-        .setP1(0x9F)
-        .setP2(0x17)
+      let getdataAPDU = CommandAPDU
+        .init( EMV.CLA_EMV, ISO7816.INS_GET_DATA, 0x9F, 0x17 )
+        .setDescription('GET DATA (PTC)')
         .setLe( 5 );
 
         return cardSlot.executeAPDU( getdataAPDU );
