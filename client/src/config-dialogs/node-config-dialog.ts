@@ -13,7 +13,7 @@ export class NodeConfigDialog {
     this.controller = controller;
   }
 
-  public activate(model): void { 
+  public activate(model): void {
     this.model = model;
     for (let key in this.model.info.configKind.kindInfo.fields) {
       if (this.model.info.configKind.kindInfo.fields.hasOwnProperty(key)) {

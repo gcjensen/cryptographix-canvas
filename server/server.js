@@ -226,7 +226,7 @@ routes.get('/getComponents', function(req, res) {
       "id": "apdu-sender",
       "component": "APDUSender",
       "metadata": { 
-        "view": { "width": "130px", "height": "130px" },
+        "view": { "width": "150px", "height": "160px" },
         "icon": "terminal",
         "vm": "apdu-sender"
       },
