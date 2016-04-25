@@ -23,7 +23,7 @@ To run the app, follow these steps.
 
   This will install the required packages and start the application. 
   
-  If the console reports errors, try rerunning build.sh.
+  **If the console reports errors, try rerunning build.sh.**
 
 4. Browse to [http://localhost:9000](http://localhost:9000). 
 
