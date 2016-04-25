@@ -8,6 +8,21 @@
   transition: width 0.4s, height 0.4s, border-radius 0.4s;
 }
 
+.apdu-sender {
+  text-align: center;
+}
+
+.apdu-sender button {
+  color: #77aca7; 
+  border: 2px solid #77aca7; 
+}
+
+.apdu-sender button:hover {
+  color: white;
+  background-color: #77aca7; 
+  border: 2px solid #77aca7; 
+}
+
 .node-regular > .icon {
   color: #77aca7;
   font-size: 40px;
@@ -26,7 +41,7 @@
 .node-regular > .command-icon {
   font-size: 50px;
   font-weight: 700;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .node-regular > .buttons {
