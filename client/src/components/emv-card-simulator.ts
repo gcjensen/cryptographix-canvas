@@ -26,6 +26,10 @@ export class EMVCardSimulatorVM {
     if (this.component) {
       this.component.bindView(this);
     }
+    // if initialData is empty, set it to the defaultConfig
+    if (Object.keys((this.node as any)._initialData).length === 0) {
+      (this.node as any)._initialData = (EMVCardSimulator as any).componentInfo.defaultConfig;
+    }
   }
 
   public startComponent(): void {
