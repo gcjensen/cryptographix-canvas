@@ -14,6 +14,7 @@ export class EMVCardSimulatorVM {
   private dialogService: DialogService;
   private component: EMVCardSimulator;
   private node: Node;
+  private running: boolean = false;
 
   constructor(dialogService: DialogService) {
     this.dialogService = dialogService;
@@ -27,14 +28,24 @@ export class EMVCardSimulatorVM {
     }
   }
 
+  public startComponent(): void {
+    this.running = true;
+  }
+
+  public stopComponent(): void {
+    this.running = false;
+  }
+
   public configure(): void {
-    let model = { "info": (EMVCardSimulator as any).componentInfo, "data": (this.node as any)._initialData };
-    this.dialogService.open({ model: model, viewModel: NodeConfigDialog}).then(response => {
-      if (!response.wasCancelled) {
-        let instance = new (EMVCardSimulator as any).componentInfo.configKind(response.output.data);
-        (this.node as any)._initialData = JSON.parse(JSON.stringify(instance));
-      }
-    });
+    if (!this.running) {
+      let model = { "info": (EMVCardSimulator as any).componentInfo, "data": (this.node as any)._initialData };
+      this.dialogService.open({ model: model, viewModel: NodeConfigDialog }).then(response => {
+        if (!response.wasCancelled) {
+          let instance = new (EMVCardSimulator as any).componentInfo.configKind(response.output.data);
+          (this.node as any)._initialData = JSON.parse(JSON.stringify(instance));
+        }
+      });
+    }
   }
 }
 
@@ -85,6 +96,7 @@ export class EMVCardSimulator implements Component {
   }
 
   public start() {
+    this.view.startComponent();
     // The SlotProtocolHandler will process incoming ISO7816 slot-protocol
     // packets, redirecting them to the linked Slot
     this._cardHandler = new SlotProtocolHandler();
@@ -92,6 +104,7 @@ export class EMVCardSimulator implements Component {
   }
 
   public stop() {
+    this.view.stopComponent();
     // Stop processing slot packets ...
     this._cardHandler.unlinkSlot( );
     this._cardHandler = null;

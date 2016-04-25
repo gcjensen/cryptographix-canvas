@@ -99,6 +99,7 @@ body {
 .second-navbar {
   margin-top: 60px; 
   background-color: #c7d8d8 !important;
+  border: 0 !important;
 }
 
 .second-navbar-brand {

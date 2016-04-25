@@ -73,3 +73,7 @@
   font-size: 20px; 
   cursor: pointer
 }
+
+.node-config {
+  margin-top: 170px !important;
+}

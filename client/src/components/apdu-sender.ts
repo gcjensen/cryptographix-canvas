@@ -82,10 +82,11 @@ export class APDUSenderVM {
             .init(EMV.CLA_EMV, ISO7816.INS_GET_DATA, 0x9F, 0x17)
             .setDescription('GET DATA (PTC)');
 
+          // check if the correct PIN was sent
           if (resp.SW == ISO7816.SW_SUCCESS) {
             this.errorCount = 0;
           } else {
-            this.errors = "PIN incorrect.";
+            this.errors = "Incorrect PIN.";
             this.errorCount++;
           }
 
