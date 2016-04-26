@@ -5,6 +5,11 @@ Author: George Jensen
 
 ## Running The App
 
+Windows is not a recommended build or execution environment. To build and run the application use:
+  1. Mac or Linux.
+  2. Linux VM.
+  3. A docker image.
+
 To run the app, follow these steps.
 
 1. Ensure NodeJS is installed.
