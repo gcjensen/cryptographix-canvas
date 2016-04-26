@@ -13,7 +13,7 @@ Windows is not a recommended build or execution environment. To build and run th
 To run the app, follow these steps.
 
 1. Ensure NodeJS is installed.
-2. Ensure [MongoDB](https://docs.mongodb.org/manual/tutorial/install-mongodb-on-os-x/#install-mongodb-manually) is installed and configured. 
+2. Ensure [MongoDB](https://docs.mongodb.org/manual/tutorial/) is installed and configured. 
 4. Make the build script executable
 
   ```shell
